@@ -5,7 +5,7 @@ setup(name = 'vrft',
 	description = 'VRFT Python Library',
 	long_description = 'VRFT Python Library',
 	keywords = 'VRFT Virtual Reference Feedback Tuning Adaptive Control',
-	url = '',
+	url = 'https://github.com/rssalessio/PythonVRFT/',
 	author = 'Alessio Russo',
 	author_email = 'alessio.russo@rapyuta-robotics.com',
 	license='GPL3',
@@ -17,5 +17,5 @@ setup(name = 'vrft',
 		'control',
 	],
 	test_suite = 'nose.collector',
-	test_require = ['nose']
+	test_requires = ['nose']
 )

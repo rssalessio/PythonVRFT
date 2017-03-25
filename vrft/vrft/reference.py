@@ -1,6 +1,8 @@
-import collections
+from vrft.utilities.iddata import iddata
+from vrft.utilities.tf import *
 import numpy as np
 import scipy.signal as sig
+import types
 
 
 def virtualReference(num, den, data):
@@ -11,11 +13,11 @@ def virtualReference(num, den, data):
 
 	N, M = systemOrder(num, den)
 
-	if (N == 1) and (M == 1):
+	if (N == 0) and (M == 0):
 		raise ValueError("The reference model can not be a constant.")
 
-	if (type(data) is not iddata):
-		raise ValueError("The passed data is not of type: ".iddata)
+	if (not isinstance(data, iddata)):
+		raise ValueError("The passed data is not of type: ", iddata.__name__)
 
 	try:
 		data.checkData()
@@ -25,8 +27,7 @@ def virtualReference(num, den, data):
 	lag = N-M
 	data_size = []
 
-	reference  = [0 for i in range(data_size)]
-
+	return True
 	for i in range(0, data_size):
 		left_side = 0
 		r = 0
@@ -42,17 +43,4 @@ def virtualReference(num, den, data):
 					left_side -= num[j]*reference[i-j]
 		rk = left_side / num[0]
 
-
-
-
-
 	return reference
-
-
-
-d = iddata(1, 1, 0.1)
-c = iddata()
-
-virtualReference([1],[1],d)
-virtualReference(1,1,c)
-print c.ts
