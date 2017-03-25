@@ -12,17 +12,28 @@ class iddata:
 		self.ts = ts
 
 	def checkData(self):
-		if (type(u) is not list) and (type(u) is not np.array):
+		if (type(self.y) is np.ndarray):
+			self.y = self.y.tolist()
+
+		if (type(self.u) is np.ndarray):
+			self.u = self.u.tolist()
+
+		if (type(self.u) is not list):
 			raise ValueError("Input signal is not an array.")
 
-		if (type(y) is not list) and (type(y) is not np.array):
+		if (type(self.y) is not list):
 			raise ValueError("Input signal is not an array.")
 
-		if (len(y) != len(u)):
+		if (len(self.y) != len(self.u)):
 			raise ValueError("Input and output size do not match.")
 
-		if (type(ts) is not float):
+		if (type(self.ts) is not float):
 			raise ValueError("Sampling time is not float.")
 
-		if (np.isclose(ts, 0.0) == True):
+		if (np.isclose(self.ts, 0.0) == True):
 			raise ValueError("Sampling time can not be zero.")
+
+		if (self.ts < 0.0):
+			raise ValueError("Sampling time can not be negative.")
+
+		return True

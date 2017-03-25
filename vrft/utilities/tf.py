@@ -2,20 +2,28 @@ import numpy as np
 
 def checkSystem(num, den):
 	try:
-		N, M = systemOrder(num, den)
+		M, N = systemOrder(num, den)
 	except ValueError:
 		raise
 
 	if (N < M):
 		raise ValueError("The system is not causal.")
 
+	return True
+
 
 
 def systemOrder(num, den):
-	if (type(num) is not list) and (type(num) is not np.array):
+	if (type(num) is np.ndarray):
+		num = num.tolist()
+
+	if (type(den) is np.ndarray):
+		den = den.tolist()
+
+	if (type(num) is not list):
 		raise ValueError("Numerator is not an array.")
 
-	if (type(den) is not list) and (type(den) is not np.array):
+	if (type(den) is not list):
 		raise ValueError("Denominator is not an array.")
 
 	N = len(den)
@@ -40,4 +48,4 @@ def systemOrder(num, den):
 	if (numOrder == -1):
 		raise ValueError("Numerator can not be zero.")
 
-	return denOrder, numOrder
+	return numOrder, denOrder
