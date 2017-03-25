@@ -12,3 +12,10 @@ Objectives
 - Implement online version
 - Generalize to other kind of controllers
 - Advanced work (non linear systems ?)
+
+
+How to install:
+
+pip install . from this folder
+
+To run tests use python setup.py test
