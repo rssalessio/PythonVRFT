@@ -51,3 +51,7 @@ class TestTF(TestCase):
 		self.assertEqual(systemOrder([1, 1, 3],[1]), (2,0))
 		self.assertEqual(systemOrder([1, 1],[1, 1, 1]), (1,2))
 		self.assertEqual(systemOrder([1],[1, 1, 1]), (0,2))
+		self.assertEqual(systemOrder([0, 1],[1, 1, 1]), (0,2))
+		self.assertEqual(systemOrder([0,0,1],[1, 1, 1]), (0,2))
+		self.assertEqual(systemOrder([0,0,1],[0, 1, 1, 1]), (0,2))
+		self.assertEqual(systemOrder([0,0,1],[0, 0, 1, 1, 1]), (0,2))

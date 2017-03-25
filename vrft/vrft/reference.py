@@ -1,10 +1,8 @@
 from vrft.utilities.iddata import iddata
 from vrft.utilities.tf import *
 import numpy as np
-import scipy.signal as sig
 import types
 
-#todo: add initial conditions for the systems, right now is set to 0
 def virtualReference(num, den, data):
 	try:
 		checkSystem(num, den)
@@ -24,6 +22,9 @@ def virtualReference(num, den, data):
 	except ValueError:
 		raise
 
+	offset_M = len(num) - M - 1
+	offset_N = len(den) - N - 1
+
 	lag = N-M #number of initial conditions 
 
 	if (lag > 0 and data.y0 == None):
@@ -32,25 +33,35 @@ def virtualReference(num, den, data):
 	if (lag != len(data.y0)):
 		raise ValueError("Wrong initial condition size.")
 
-	data_size = [0 for i in range(len(data.y))]
+	reference = [0 for i in range(len(data.y))]
 
-	return True
-	for i in range(0, data_size):
+	for k in range(0, len(data.y)+lag):
 		left_side = 0
 		r = 0
 		first = True
 
+		start_i = 0  if k >= M else M-k
+		start_j = 0  if k >= N else N-k
 
+		for i in range(start_i, N+1):
+			index = k+i-N
+			if (index < 0):
+				left_side += den[offset_N + abs(i-N)]*data.y0[abs(index)-1]
+			else:
+				left_side += den[offset_N + abs(i-N)]*data.y[index]
 
-		for j in range(0, N):
-			if (i-j >= 0):
-				left_side += den[j]*data.y[i-j]
-		for j in range(0, M):
-			if (i-j >= 0):
-				if (num[j] != 0 and first == True):
-					r = num[j]
-				else:
-					left_side -= num[j]*reference[i-j]
-		rk = left_side / num[0]
+		for j in range(start_j, M+1):
+			index = k+j-N
+			if (start_j != M):
+				left_side += -num[offset_M + abs(j-M)]*reference[index]
+			else:
+				r = num[offset_M]
 
-	return reference
+		if (np.isclose(r, 0.0) != True) :
+			reference[k] = left_side/r
+		else:
+			reference[k-lag] = 0.0
+
+	print reference
+
+	raise ValueError("test")
