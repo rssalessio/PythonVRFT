@@ -32,10 +32,11 @@ data = vrft.iddata(y[0],u,t_step,[0])
 #Reference Model
 refModel = ctl.tf([0.2], [1, -0.8], t_step)
 
-#PI Controller
+#PID Controller
 base = [ctl.tf([1], [1],t_step),
 	ctl.tf([1, 0], [1, -1],t_step),
 	ctl.tf([1, -1], [1, 0],t_step)]
+
 
 #Experiment filter
 omega = 2*np.pi*1
