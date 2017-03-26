@@ -6,7 +6,7 @@ from vrft.vrft.reference import *
 
 
 def calcFinalController(theta, base):
-	return np.dot(theta, base)
+	return np.dot(theta, base).item((0,0))
 
 def calcMinimum(phi, data):
 	phi = np.mat(phi)
@@ -55,7 +55,7 @@ def vrftAlgorithm(data, referenceModel, base):
 
 	theta = calcMinimum(phi, data)
 
-	return calcFinalController(theta, base)
+	return calcFinalController(theta, base), theta
 
 
 
