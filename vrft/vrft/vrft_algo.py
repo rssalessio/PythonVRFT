@@ -6,6 +6,7 @@ from vrft.vrft.reference import *
 
 
 def calcFinalController(theta, base):
+	return np.dot(theta, base)
 
 def calcMinimum(phi, data):
 	phi = np.mat(phi)
@@ -16,17 +17,18 @@ def calcMinimum(phi, data):
 
 	return theta
 
-def calcControllerReponse(base, error, data):
+def calcControllerResponse(base, error, data):
 	t_start = 0
-	t_end = len(data.y)
 	t_step = data.ts
+	t_end = len(data.y)*t_step
+	
 
 	t =  np.arange(t_start, t_end, t_step)
 
-	phi = np.zeros(len(base), len(t))
+	phi = np.zeros((len(base), len(t)))
 	
 	for i in range(len(base)):
-		y, t, x = ctl.lsim(base[i], error, t)
+		y, t, x = ctl.lsim(base[i], error.tolist(), t)
 		phi[i, :] = y
 
 	return phi
@@ -45,9 +47,9 @@ def vrftAlgorithm(data, referenceModel, base):
 		if (not isinstance(base[i], ctl.TransferFunction)):
 			raise ValueError("Some of the components of the controller are not transfer functions.")
 
-	r = reference(referenceModel.num.tolist(), referenceModel.den.tolist(), data)
+	r = virtualReference(referenceModel.num[0][0], referenceModel.den[0][0], data)
 	
-	e =  r - data.y
+	e =  np.subtract(r,data.y)
 
 	phi = calcControllerResponse(base, e, data)
 

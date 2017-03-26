@@ -12,6 +12,8 @@ def virtualReference(num, den, data):
 	M,N= systemOrder(num, den)
 
 	if (N == 0) and (M == 0):
+		print num
+		print den
 		raise ValueError("The reference model can not be a constant.")
 
 	if (not isinstance(data, iddata)):
