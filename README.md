@@ -31,6 +31,7 @@ Objectives
 - [**DONE**, 26.03.2017] Implement the basic VRFT algorithm (1 DOF. offline, linear controller, controller expressed as scalar product theta*f(z))
 - [**TODO**] Add Documentation and Latex formulas
 - [**TODO**] Calculate best coefficients (based on H2 norm, with weights) given controller structure, reference system and actual system model. Show results.
+- [**TODO**] Modifications to LS (forgetting factor, covariance, ...)
 - [**TODO**] Implement  multiple DOF, sensitivity analysis
 - [**TODO**] Implement online version
 - [**TODO**] Generalize to other kind of controllers
