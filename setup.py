@@ -9,7 +9,7 @@ setup(name = 'vrft',
 	author = 'Alessio Russo',
 	author_email = 'alessio.russo@rapyuta-robotics.com',
 	license='GPL3',
-	packages=['vrft'],
+	packages=['vrft', 'vrft.tests', 'vrft.utilities', 'vrft.vrft'],
 	zip_safe=False,
 	install_requires = [
 		'scipy',

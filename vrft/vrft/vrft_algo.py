@@ -61,7 +61,7 @@ def vrftAlgorithm(data, referenceModel, base, filter=None):
 
 	theta = calcMinimum(phi, data)
 
-	return calcFinalController(theta, base), theta
+	return calcFinalController(theta, base), theta, r
 
 
 
