@@ -1,6 +1,6 @@
 from unittest import TestCase
-from vrft.utilities.iddata import iddata
-from vrft.vrft.reference import virtualReference
+from vrft.utilities.iddata import *
+from vrft.vrft.reference import *
 import numpy as np
 import control as ctl
 

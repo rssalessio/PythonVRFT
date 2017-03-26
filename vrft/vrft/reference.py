@@ -1,4 +1,4 @@
-from vrft.utilities.iddata import iddata
+from vrft.utilities.iddata import *
 from vrft.utilities.tf import *
 import numpy as np
 import types
@@ -61,7 +61,7 @@ def virtualReference(num, den, data):
 		else:
 			reference[k-lag] = 0.0
 
-	#add missing data..just copy last N points
+	#add missing data..just copy last N-M points
 	for i in range(lag):
 		reference[len(data.y)+i-lag] =reference[len(data.y)+i-1-lag]
 
