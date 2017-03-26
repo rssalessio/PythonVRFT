@@ -17,13 +17,19 @@ def calcMinimum(phi, data):
 
 	return theta
 
-def calcControllerResponse(base, error, data):
+def calcControllerResponse(base, error, data, filter=None):
 	t_start = 0
 	t_step = data.ts
 	t_end = len(data.y)*t_step
-	
 
 	t =  np.arange(t_start, t_end, t_step)
+
+	if (filter != None):
+		error, t, x = ctl.lsim(filter, error, t)
+		u, t, x = ctl.lsim(filter, data.u, t)
+		error = error[0]
+		u = u[0]
+		data.u = u
 
 	phi = np.zeros((len(base), len(t)))
 	
@@ -33,7 +39,7 @@ def calcControllerResponse(base, error, data):
 
 	return phi
 
-def vrftAlgorithm(data, referenceModel, base):
+def vrftAlgorithm(data, referenceModel, base, filter=None):
 	if (not isinstance(data, iddata)):
 		raise ValueError("The passed data is not of type: ", iddata.__name__)
 
@@ -51,7 +57,7 @@ def vrftAlgorithm(data, referenceModel, base):
 	
 	e =  np.subtract(r,data.y)
 
-	phi = calcControllerResponse(base, e, data)
+	phi = calcControllerResponse(base, e, data, filter)
 
 	theta = calcMinimum(phi, data)
 
