@@ -8,7 +8,7 @@ def generateNoise(t):
 	xi = 0.9
 	noise =  np.random.normal(0,0.1,t.size)
 	# Second order system
-	yn,t,x = ctl.lsim(ctl.tf([10*omega**2], [1, 2*xi*omega, omega**2]), \
+	yn,t,x = ctl.lsim(ctl.tf([omega**2], [1, 2*xi*omega, omega**2]), \
 		noise, t)
 	return yn
 
@@ -23,21 +23,22 @@ u[600:800] = np.zeros(200)
 
 #Experiment
 num = [0.5]
-den = [1, -0.9]
+den = [1, -1.6, 0.8]
 sys = ctl.tf(num, den, t_step)
 y,t,x= ctl.lsim(sys, u, t)
 y += generateNoise(t)
 data = vrft.iddata(y[0],u,t_step,[0])
 
 #Reference Model
-refModel = ctl.tf([0.6], [1, -0.4], t_step)
+refModel = ctl.tf([0.2], [1, -0.8], t_step)
 
 #PI Controller
 base = [ctl.tf([1], [1],t_step),
-	ctl.tf([1, 0], [1, -1],t_step)]
+	ctl.tf([1, 0], [1, -1],t_step),
+	ctl.tf([1, -1], [1, 0],t_step)]
 
 #Experiment filter
-omega = 2*np.pi*0.1
+omega = 2*np.pi*1
 L =  ctl.tf([1], [1/omega, 1])
 L =  ctl.sample_system(L, 0.01)
 
