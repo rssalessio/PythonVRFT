@@ -49,8 +49,10 @@ class TestReference(TestCase):
 
 		#test good data, first order
 		data = iddata(y[0],u,t_step,[0])
-		with self.assertRaises(ValueError):
-			virtualReference(num, den, data)
+		r=virtualReference(num, den, data)
+		for i in range(len(r)):
+			self.assertTrue(np.isclose(r[i], u[i]))
+
 
 		num = [0, 1-1.6+0.63]
 		den = [1, -1.6, 0.63]
@@ -58,12 +60,6 @@ class TestReference(TestCase):
 		y,t,x = ctl.lsim(sys, u, t)
 		data = iddata(y[0],u,t_step,[0,0])
 		#test second order
-		with self.assertRaises(ValueError):
-			virtualReference(num, den, data)
-		self.assertTrue(False)
-
-
-
-
-
-
+		r=virtualReference(num, den, data)
+		for i in range(len(r)):
+			self.assertTrue(np.isclose(r[i], u[i]))

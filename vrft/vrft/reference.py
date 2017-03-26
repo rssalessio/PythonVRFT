@@ -35,10 +35,9 @@ def virtualReference(num, den, data):
 
 	reference = [0 for i in range(len(data.y))]
 
-	for k in range(0, len(data.y)+lag):
+	for k in range(0, len(data.y)):
 		left_side = 0
 		r = 0
-		first = True
 
 		start_i = 0  if k >= M else M-k
 		start_j = 0  if k >= N else N-k
@@ -58,10 +57,12 @@ def virtualReference(num, den, data):
 				r = num[offset_M]
 
 		if (np.isclose(r, 0.0) != True) :
-			reference[k] = left_side/r
+			reference[k-lag] = left_side/r
 		else:
 			reference[k-lag] = 0.0
 
-	print reference
+	#add missing data..just copy last N points
+	for i in range(lag):
+		reference[len(data.y)+i-lag] =reference[len(data.y)+i-1-lag]
 
-	raise ValueError("test")
+	return reference
