@@ -1,68 +1,107 @@
+from vrft.utilities.iddata import iddata
+from vrft.utilities.utils import systemOrder, checkSystem, filter_iddata
 import numpy as np
-from numpy.linalg import inv
-import control as ctl
-from vrft.utilities.iddata import *
-from vrft.vrft.reference import *
+import scipy.signal as scipysig
+
+def virtualReference(data: iddata, num: np.ndarray, den: np.ndarray) -> np.ndarray:
+    try:
+        checkSystem(num, den)
+    except ValueError:
+        raise ValueError('Error in check system')
+
+    M, N = systemOrder(num, den)
+
+    if (N == 0) and (M == 0):
+        raise ValueError("The reference model can not be a constant.")
+
+    data.checkData()
+    offset_M = len(num) - M - 1
+    offset_N = len(den) - N - 1
+
+    lag = N - M  #number of initial conditions
+
+    if (lag > 0 and data.y0 is None):
+        raise ValueError("Wrong initial condition.")
+
+    if (lag != len(data.y0)):
+        raise ValueError("Wrong initial condition size.")
+
+    reference = np.zeros_like(data.y)
+    L = len(data.y)
+
+    for k in range(0, len(data.y) + lag):
+        left_side = 0
+        r = 0
+
+        start_i = 0 if k >= M else M - k
+        start_j = 0 if k >= N else N - k
+
+        for i in range(start_i, N + 1):
+            index = k + i - N
+            if (index < 0):
+                left_side += den[offset_N +
+                                 abs(i - N)] * data.y0[abs(index) - 1]
+            else:
+                left_side += den[offset_N + abs(i - N)] * (
+                    data.y[index] if index < L else 0)
+
+        for j in range(start_j, M + 1):
+            index = k + j - N
+            if (start_j != M):
+                left_side += -num[offset_M + abs(j - M)] * reference[index]
+            else:
+                r = num[offset_M]
+
+        if (np.isclose(r, 0.0) != True):
+            reference[k - lag] = left_side / r
+        else:
+            reference[k - lag] = 0.0
+
+    #add missing data..just copy last N-M points
+    #for i in range(lag):
+    #    reference[len(self.data.y)+i-lag] =0 #reference[len(self.data.y)+i-1-lag]
+
+    return reference[:-lag], len(reference[:-lag])
 
 
-def calcFinalController(theta, base):
-	return np.dot(theta, base).item((0,0))
+def compute_vrft_loss(data: iddata, phi: np.ndarray, theta: np.ndarray):
+    z = np.dot(phi, theta.T).flatten()
+    L = z.size
+    return np.linalg.norm(data.u[:L] - z)**2 / L
 
-def calcMinimum(phi, data):
-	phi = np.mat(phi)
+def calc_minimum(data: iddata, phi: np.ndarray):
+    phi = np.mat(phi)
+    nk = phi.shape[1]
+    #least squares
+    theta = np.linalg.inv(phi.T @ phi) @ phi.T
 
-	#least squares
-	theta = inv(phi * phi.T)*phi
-	theta = np.dot(theta, data.u)
+    L = theta.shape[1]
+    theta = np.array(np.dot(theta, data.u[:L])).flatten()
+    return theta, phi
 
-	return theta
+def control_response(data: iddata, error: np.ndarray, control: list):
+    t_start = 0
+    t_step = data.ts
+    t_end = len(error) * t_step
+    t = np.arange(t_start, t_end, t_step)
 
-def calcControllerResponse(base, error, data, filter=None):
-	t_start = 0
-	t_step = data.ts
-	t_end = len(data.y)*t_step
+    phi = np.zeros((len(control), len(t)))
+    for i in range(len(control)):
+        t, y = scipysig.dlsim(control[i], error, t)
+        phi[i, :] = y[:, 0]
 
-	t =  np.arange(t_start, t_end, t_step)
+    phi = phi.T
+    return phi
 
-	if (filter != None):
-		error, t, x = ctl.lsim(filter, error, t)
-		u, t, x = ctl.lsim(filter, data.u, t)
-		error = error[0]
-		u = u[0]
-		data.u = u
+def compute_vrft(data: iddata, refModel: scipysig.dlti, control: list, L: scipysig.dlti):
+    data = filter_iddata(data, L)
+    r, n = virtualReference(data,
+                         refModel.num,
+                         refModel.den)
 
-	phi = np.zeros((len(base), len(t)))
-	
-	for i in range(len(base)):
-		y, t, x = ctl.lsim(base[i], error.tolist(), t)
-		phi[i, :] = y
+    phi = control_response(data, np.subtract(r, data.y[:-n]), control)
+    theta, phi = calc_minimum(data, phi)
+    loss = compute_vrft_loss(data, phi, theta)
 
-	return phi
-
-def vrftAlgorithm(data, referenceModel, base, filter=None):
-	if (not isinstance(data, iddata)):
-		raise ValueError("The passed data is not of type: ", iddata.__name__)
-
-	if (not isinstance(referenceModel, ctl.TransferFunction)):
-		raise ValueError("The passed reference model is not of type: ", ctl.TransferFunction.__name__)
-
-	if (type(base) is not list):
-		raise ValueError("Should pass a list of controllers.")
-
-	for i in range(len(base)):
-		if (not isinstance(base[i], ctl.TransferFunction)):
-			raise ValueError("Some of the components of the controller are not transfer functions.")
-
-	r = virtualReference(referenceModel.num[0][0], referenceModel.den[0][0], data)
-	
-	e =  np.subtract(r,data.y)
-
-	phi = calcControllerResponse(base, e, data, filter)
-
-	theta = calcMinimum(phi, data)
-
-	return calcFinalController(theta, base), theta, r
-
-
-
-
+    final_control = np.dot(theta, control)
+    return theta, r, phi, loss, final_control

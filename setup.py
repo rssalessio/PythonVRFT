@@ -1,20 +1,19 @@
 from setuptools import setup
 
 setup(name = 'vrft',
-	version = '0.0.2',
+	version = '0.0.3',
 	description = 'VRFT Python Library',
 	long_description = 'VRFT Python Library',
 	keywords = 'VRFT Virtual Reference Feedback Tuning Adaptive Control',
 	url = 'https://github.com/rssalessio/PythonVRFT/',
 	author = 'Alessio Russo',
-	author_email = 'alessio.russo@rapyuta-robotics.com',
+	author_email = 'alessior@kth.se',
 	license='GPL3',
-	packages=['vrft', 'vrft.tests', 'vrft.utilities', 'vrft.vrft'],
+	packages=['vrft', 'test', 'vrft.utilities', 'vrft.vrft'],
 	zip_safe=False,
 	install_requires = [
 		'scipy',
 		'numpy',
-		'control',
 	],
 	test_suite = 'nose.collector',
 	test_requires = ['nose']
