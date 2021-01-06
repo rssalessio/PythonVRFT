@@ -1,5 +1,5 @@
 from unittest import TestCase
-from vrft.utilities.iddata import iddata
+from vrft.iddata import iddata
 import numpy as np
 
 class TestIDData(TestCase):

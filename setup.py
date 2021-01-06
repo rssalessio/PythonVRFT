@@ -9,7 +9,7 @@ setup(name = 'vrft',
 	author = 'Alessio Russo',
 	author_email = 'alessior@kth.se',
 	license='GPL3',
-	packages=['vrft', 'test', 'vrft.utilities', 'vrft.vrft'],
+	packages=['vrft', 'test'],
 	zip_safe=False,
 	install_requires = [
 		'scipy',

@@ -1,11 +1,6 @@
-from __future__ import division
-
 import numpy as np
 import scipy.signal as scipysig
 from .iddata import iddata
-
-from scipy.signal.ltisys import TransferFunction as TransFun
-from numpy import polymul, polyadd
 
 def Doperator(p: int, q: int, x: float) -> np.ndarray:
     D = np.zeros((p * q, q))

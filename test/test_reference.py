@@ -1,7 +1,7 @@
 from unittest import TestCase
-from vrft.utilities.iddata import *
-from vrft.utilities.utils import *
-from vrft.vrft.vrft_algo import *
+from vrft.iddata import *
+from vrft.utils import *
+from vrft.vrft_algo import *
 import numpy as np
 import scipy.signal as scipysig
 

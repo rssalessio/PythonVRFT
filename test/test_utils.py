@@ -1,6 +1,7 @@
 from unittest import TestCase
-from vrft.utilities.utils import *
-from vrft.vrft.vrft_algo import virtualReference
+from vrft.utils import *
+from vrft.extended_tf import ExtendedTF
+from vrft.vrft_algo import virtualReference
 import numpy as np
 import scipy.signal as scipysig
 
