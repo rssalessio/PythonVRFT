@@ -1,5 +1,5 @@
 from vrft.utilities.iddata import iddata
-from vrft.utilities.utils import systemOrder, checkSystem, filter_iddata
+from vrft.utilities.utils import systemOrder, checkSystem, filter_iddata, deconvolve_signal
 import numpy as np
 import scipy.signal as scipysig
 
@@ -94,14 +94,22 @@ def control_response(data: iddata, error: np.ndarray, control: list):
     return phi
 
 def compute_vrft(data: iddata, refModel: scipysig.dlti, control: list, L: scipysig.dlti):
+    # import pdb
+    # import matplotlib.pyplot as plt
+    # pdb.set_trace()
     data = filter_iddata(data, L)
     r, n = virtualReference(data,
                          refModel.num,
                          refModel.den)
+    # r2=deconvolve_signal(refModel, data.y, data.ts)
+    # plt.plot(r)
+    # plt.plot(r2)
+    # plt.show()
 
-    phi = control_response(data, np.subtract(r, data.y[:-n]), control)
+    phi = control_response(data, np.subtract(r, data.y[:n]), control)
     theta, phi = calc_minimum(data, phi)
     loss = compute_vrft_loss(data, phi, theta)
-
+    print(phi)
+    #theta[0] = -theta[0]
     final_control = np.dot(theta, control)
     return theta, r, phi, loss, final_control

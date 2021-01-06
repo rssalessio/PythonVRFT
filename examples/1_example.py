@@ -4,14 +4,14 @@ import scipy.signal as scipysig
 from vrft import *
 
 def generateNoise(t):
-	omega = 2*np.pi*100
-	xi = 0.9
-	dt = t[1] - t[0]
-	noise =  np.random.normal(0,0.1,t.size)
-	tf = scipysig.TransferFunction([10*omega**2], [1, 2*xi*omega, omega**2])
-	# Second order system
-	_, yn, _ = scipysig.lsim(tf, noise, t)
-	return yn
+    omega = 2*np.pi*100
+    xi = 0.9
+    dt = t[1] - t[0]
+    noise =  np.random.normal(0,0.1,t.size)
+    tf = scipysig.TransferFunction([10*omega**2], [1, 2*xi*omega, omega**2])
+    # Second order system
+    _, yn, _ = scipysig.lsim(tf, noise, t)
+    return yn
 
 #Generate time and u(t) signals
 t_start = 0
@@ -28,7 +28,7 @@ den = [1, -0.9]
 sys = ExtendedTF(num, den, dt=t_step)
 t, y = scipysig.dlsim(sys, u, t)
 y = y[:, 0]
-y += generateNoise(t)
+#y += generateNoise(t)
 data = iddata(y, u, t_step, [0])
 
 
@@ -37,7 +37,7 @@ refModel = ExtendedTF([0.6], [1, -0.4], dt=t_step)
 
 #PI Controller
 base = [ExtendedTF([1], [1, -1], dt=t_step),
-	    ExtendedTF([1, 0], [1, -1], dt=t_step)]
+        ExtendedTF([1, 0], [1, -1], dt=t_step)]
 
 #Experiment filter
 L = refModel * (1 -  refModel)
@@ -47,10 +47,10 @@ theta, r, _, _, C = compute_vrft(data, refModel, base, L)
 #Obtained controller
 print("Controller: {}".format(C))
 
-L = C * sys
-L = feedback(L)
+L = (C * sys).feedback()
 
 print("Theta: {}".format(theta))
+print(scipysig.ZerosPolesGain(L))
 
 #Analysis
 t = t[:len(r)]
