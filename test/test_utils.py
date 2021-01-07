@@ -1,3 +1,8 @@
+# test_utils.py - Unittest for utilities
+#
+# Code author: [Alessio Russo - alessior@kth.se]
+# Last update: 07th January 2020, by alessior@kth.se
+#
 # Copyright [2017-2020] [Alessio Russo - alessior@kth.se]  
 # This file is part of PythonVRFT.
 # PythonVRFT is free software: you can redistribute it and/or modify
@@ -10,14 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with PythonVRFT.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Code author: [Alessio Russo - alessior@kth.se]
-# Last update: 06th January 2020, by alessior@kth.se
-#
+
 
 from unittest import TestCase
 from vrft.utils import *
 from vrft.extended_tf import ExtendedTF
 from vrft.vrft_algo import virtualReference
+from vrft.iddata import iddata
 import numpy as np
 import scipy.signal as scipysig
 
@@ -33,7 +37,7 @@ class TestUtils(TestCase):
         y = y[:, 0]
         data = iddata(y, u, t_step, [0])
         r1, _ = virtualReference(data, sys.num, sys.den)
-        r2 = deconvolve_signal(sys, data.y, data.ts)
+        r2 = deconvolve_signal(sys, data.y)
         self.assertTrue(np.linalg.norm(r2-r1[:r2.size], np.infty) <  1e-3)
 
 

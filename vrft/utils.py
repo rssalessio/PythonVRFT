@@ -19,7 +19,6 @@
 
 import numpy as np
 import scipy.signal as scipysig
-from vrft.iddata import iddata
 from typing import overload
 
 def Doperator(p: int, q: int, x: float) -> np.ndarray:
@@ -101,51 +100,47 @@ def systemOrder(num: np.ndarray, den: np.ndarray) -> tuple:
 
     return (np.poly1d(num).order, np.poly1d(den).order)
 
-
-def filter_iddata(data: iddata, L: scipysig.dlti) -> iddata:
+def filter_signal(L: scipysig.dlti, x: np.ndarray, x0: np.ndarray = None) -> np.ndarray:
     """Filter data in an iddata object
     Parameters
     ----------
-    data : iddata
-        iddata object containing the data to filter
     L : scipy.signal.dlti
-        Transfer function used to filter the data
-
+        Discrete-time rational transfer function used to
+        filter the signal
+    x : np.ndarray
+        Signal to filter
+    x0 : np.ndarray, optional
+        Initial conditions for L
     Returns
     -------
-    data : iddata
+    signal : iddata
         Filtered iddata object
     """
     t_start = 0
-    t_step = data.ts
-    t_end = len(data.y) * t_step
+    t_step = L.dt
+    t_end = x.size * t_step
 
     t = np.arange(t_start, t_end, t_step)
+    _, y = scipysig.dlsim(L, x, t, x0)
+    return y.flatten()
 
-    if (L != None):
-        t, y = scipysig.dlsim(L, data.y, t)
-        t, u = scipysig.dlsim(L, data.u, t)
-        return iddata(y[:, 0], u[:, 0], data.ts, data.y0)
-    return data
-
-def deconvolve_signal(T: scipysig.dlti, x: np.ndarray, dt: float) -> np.ndarray:
-    """Deconvolve a signal x using a specified transfer function T
+def deconvolve_signal(L: scipysig.dlti, x: np.ndarray) -> np.ndarray:
+    """Deconvolve a signal x using a specified transfer function L(z)
     Parameters
     ----------
-    T : scipy.signal.dlti
+    L : scipy.signal.dlti
         Discrete-time rational transfer function used to
         deconvolve the signal
     x : np.ndarray
         Signal to deconvolve
-    dt: float
-        Sampling time
 
     Returns
     -------
     signal : np.ndarray
         Deconvolved signal
     """
-    impulse = scipysig.dimpulse(T)[1][0].flatten()
+    dt = L.dt
+    impulse = scipysig.dimpulse(L)[1][0].flatten()
     idx1 = np.argwhere(impulse != 0)[0].item()
     idx2 = np.argwhere(np.isclose(impulse[idx1:], 0.) == True)
     idx2 = -1 if idx2.size == 0 else idx2[0].item()

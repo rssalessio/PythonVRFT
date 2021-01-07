@@ -1,4 +1,4 @@
-# PythonVRFT Library - Version 0.0.4
+# PythonVRFT Library - Version 0.0.5
 VRFT Adaptive Control Library written in Python. Aim of this library is to provide an implementation of the VRFT (Virtual Reference Feedback Tuning) algorithm.
 
 You can find the package also at the following [link](https://pypi.org/project/pythonvrft/)
@@ -25,7 +25,7 @@ pip install .
 ``` 
 
 ## Examples
-Examples are located in the examples/ folder. At the moment only 1 example is available.
+Examples are located in the examples/ folder. At the moment 2 examples are available. One without instrumental variables and one using instrumental variables.
 
 ## Tests
 To execute tests run the following command
@@ -34,11 +34,11 @@ python -m unittest
 ``` 
 
 ## Changelog
-- [**DONE - V0.0.2**][26.03.2017] Implement the basic VRFT algorithm (1 DOF. offline, linear controller, controller expressed as scalar product theta*f(z))
-- [**DONE - V0.0.3**][05.01.2020] Code refactoring and conversion to Python 3; Removed support for Python Control library.
-- [**In Progress - V0.0.4**][07.01.2020-] Add Documentation and Latex formulas
+- [**DONE**][V. 0.0.2][26.03.2017] Implement the basic VRFT algorithm (1 DOF. offline, linear controller, controller expressed as scalar product theta*f(z))
+- [**DONE**][V. 0.0.3][05.01.2020] Code refactoring and conversion to Python 3; Removed support for Python Control library.
+- [**DONE**][v. 0.0.5][07.01.2020] Add Instrumental Variables (IVs) Support
+- [**In Progress**][-][07.01.2020-] Add Documentation and Latex formulas
 - [**TODO**] Add MIMO Support
-- [**TODO**] Add IV Support
 - [**TODO**] Generalize to other kind of controllers (e.g., neural nets)
 
 ## Citations

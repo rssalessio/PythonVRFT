@@ -76,7 +76,7 @@ class ExtendedTF(scipysig.ltisys.TransferFunctionDiscrete):
         if type(other) in [int, float]:
             return ExtendedTF(polyadd(self.num, self.den*other), self.den, dt=self._dt)
         if type(other) in [TransFun, type(self)]:
-            if np.all(self.den == other.den):
+            if len(self.den) == len(other.den) and np.all(self.den == other.den):
                 numer = polyadd(self.num, other.num)
                 denom = self.den
             else:
@@ -88,7 +88,7 @@ class ExtendedTF(scipysig.ltisys.TransferFunctionDiscrete):
         if type(other) in [int, float]:
             return ExtendedTF(polyadd(self.num, -self.den*other), self.den, dt=self._dt)
         if type(other) in [TransFun, type(self)]:
-            if np.all(self.den == other.den):
+            if len(self.den) == len(other.den) and np.all(self.den == other.den):
                 numer = polyadd(self.num, -other.num)
                 denom = self.den
             else:
@@ -100,7 +100,7 @@ class ExtendedTF(scipysig.ltisys.TransferFunctionDiscrete):
         if type(other) in [int, float]:
             return ExtendedTF(polyadd(-self.num, self.den*other), self.den, dt=self._dt)
         if type(other) in [TransFun, type(self)]:
-            if np.all(self.den == other.den):
+            if len(self.den) == len(other.den) and np.all(self.den == other.den):
                 numer = polyadd(self.num, -other.num)
                 denom = self.den
             else:

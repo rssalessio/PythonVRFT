@@ -19,7 +19,7 @@
 
 from vrft.iddata import iddata
 from vrft.utils import systemOrder, checkSystem, \
-    filter_iddata
+    filter_signal
 import numpy as np
 import scipy.signal as scipysig
 
@@ -34,7 +34,7 @@ def virtualReference(data: iddata, num: np.ndarray, den: np.ndarray) -> np.ndarr
     if (N == 0) and (M == 0):
         raise ValueError("The reference model can not be a constant.")
 
-    data.checkData()
+    data.check()
     offset_M = len(num) - M - 1
     offset_N = len(den) - N - 1
 
@@ -89,15 +89,32 @@ def compute_vrft_loss(data: iddata, phi: np.ndarray, theta: np.ndarray):
     L = z.size
     return np.linalg.norm(data.u[:L] - z)**2 / L
 
-def calc_minimum(data: iddata, phi: np.ndarray):
-    phi = np.mat(phi)
-    nk = phi.shape[1]
+def calc_minimum(data: iddata, phi1: np.ndarray,
+                 phi2: np.ndarray = None):
+    """Compute least squares minimum
+    Parameters
+    ----------
+    data : iddata
+        iddata object containing data from experiments
+    phi1 : np.ndarray
+        Regressor
+    phi2 : np.ndarray, optional
+        Second regressor (used only with instrumental variables)
+
+    Returns
+    -------
+    theta : np.ndarray
+        Coefficients computed for the control basis
+    """
+    phi1 = np.mat(phi1)
+    phi2 = np.mat(phi2) if phi2 is not None else phi1
+    nk = phi1.shape[1]
     #least squares
-    theta = np.linalg.inv(phi.T @ phi) @ phi.T
+    theta = np.linalg.inv(phi2.T @ phi1) @ phi2.T
 
     L = theta.shape[1]
     theta = np.array(np.dot(theta, data.u[:L])).flatten()
-    return theta, phi
+    return theta
 
 def control_response(data: iddata, error: np.ndarray, control: list):
     t_start = 0
@@ -107,25 +124,41 @@ def control_response(data: iddata, error: np.ndarray, control: list):
 
     phi = np.zeros((len(control), len(t)))
     for i in range(len(control)):
+
         t, y = scipysig.dlsim(control[i], error, t)
-        phi[i, :] = y[:, 0]
+        if y.size != error.size:
+            phi[i, :] = [0, y.flatten()]
+        else:
+            phi[i, :] = y.flatten()
 
     phi = phi.T
     return phi
 
 def compute_vrft(data: iddata, refModel: scipysig.dlti,
-                 control: list, prefilter: scipysig.dlti = None):
+                 control: list, prefilter: scipysig.dlti = None,
+                 iv: bool =  False):
     """Compute VRFT Controller
     Parameters
     ----------
-    data : iddata
-        iddata object containing data from experiments
+    data : iddata or list of iddata objects
+        Data used to identify theta.
+        - If data is an iddata object and iv is set to True,
+          then the data will be split into half in order
+          to compute the instrumental variable.
+
+        - If data a list of iddata objects and iv is False, then
+           only the first element will be used to identify theta. 
+           If iv is True the first two elements will be used.
     refModel : scipy.signal.dlti
         Discrete Transfer Function representing the reference model
     control : list
         list of discrete transfer functions, representing the control basis
     prefilter : scipy.signal.dlti, optional
         Filter used to pre-filter the data
+    iv : bool, optiona;
+        Instrumental variable option. If true, the dataset will be split in two, and
+        the instrumental variable will be constructed based on the second half of the
+        dataset 
 
     Returns
     -------
@@ -133,30 +166,62 @@ def compute_vrft(data: iddata, refModel: scipysig.dlti,
         Coefficients computed for the control basis
     r : np.ndarray
         Virtual reference signal
-    phi: np.ndarray
-        Toeplitz matrix used to compute theta
     loss: float
         VRFT loss
     final_control: scipy.signal.dlti
         Final controller
     """
+    if not isinstance(data, iddata):
+        if not isinstance(data, list):
+            raise ValueError('data should be an iddata object or a list of iddata objects')
+        else:
+            for d in data:
+                if not isinstance(d, iddata):
+                    raise ValueError('data should be a list of iddata objects')
 
     # Prefilter the data
     if prefilter is not None and isinstance(prefilter, scipysig.dlti):
-        data = filter_iddata(data, prefilter)
+        if isinstance(data, list):
+            for i, d in enumerate(data):
+                data[i] = d.copy().filter(prefilter)
+        else:
+            data = data.copy().filter(prefilter)
 
-    # Compute virtual reference
-    r, n = virtualReference(data,
-                         refModel.num,
-                         refModel.den)
 
-    # Compute control response given the virtual reference
-    phi = control_response(data, np.subtract(r, data.y[:n]), control)
+    if not iv:
+        if isinstance(data, list):
+            data = data[0]
+        data.check()
 
-    # Compute MSE minimizer
-    theta, phi = calc_minimum(data, phi)
+        # Compute virtual reference
+        r, n = virtualReference(data, refModel.num, refModel.den)
+
+        # Compute control response given the virtual reference
+        phi = control_response(data, np.subtract(r, data.y[:n]), control)
+
+        # Compute MSE minimizer
+        theta = calc_minimum(data, phi)
+    else:
+        # Retrieve the two datasets
+        if isinstance(data, list):
+            d1 = data[0]
+            d2 = data[1]
+            d1.check()
+            d2.check()
+            # check if the two datasets have same size
+            if d1.y.size != d2.y.size:
+                raise ValueError('The two datasets should have same size!')
+        else:
+            d1, d2 = data.split()
+        r1, n1 = virtualReference(d1, refModel.num, refModel.den)
+        r2, n2 = virtualReference(d2, refModel.num, refModel.den)
+        phi1 = control_response(d1, np.subtract(r1, d1.y[:n1]), control)
+        phi2 = control_response(d2, np.subtract(r2, d2.y[:n2]), control)
+        theta = calc_minimum(data, phi1, phi2)
+
+    # Compute VRFT loss
     loss = compute_vrft_loss(data, phi, theta)
-
     # Final controller
     final_control = np.dot(theta, control)
-    return theta, r, phi, loss, final_control
+
+    return theta, r, loss, final_control
