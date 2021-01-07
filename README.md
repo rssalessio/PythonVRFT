@@ -37,7 +37,7 @@ python -m unittest
 - [**V. 0.0.2**][26.03.2017] Implement the basic VRFT algorithm (1 DOF. offline, linear controller, controller expressed as scalar product theta*f(z))
 - [**V. 0.0.3**][05.01.2020] Code refactoring and conversion to Python 3; Removed support for Python Control library.
 - [**V. 0.0.5**][07.01.2020] Add Instrumental Variables (IVs) Support
-- [**In Progress**][07.01.2020-] Add Documentation and Latex formulas (Milestone v.0.1)
+- [**In Progress**][07.01.2020-] Add Documentation and Latex formulas
 - [**TODO**] Add MIMO Support
 - [**TODO**] Generalize to other kind of controllers (e.g., neural nets)
 
@@ -50,3 +50,5 @@ If you find this code useful in your research, please, consider citing it:
 >  doi          = {},
 >  url          = { https://github.com/rssalessio/PythonVRFT }
 >}
+
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
