@@ -34,10 +34,10 @@ python -m unittest
 ``` 
 
 ## Changelog
-- [**DONE**][V. 0.0.2][26.03.2017] Implement the basic VRFT algorithm (1 DOF. offline, linear controller, controller expressed as scalar product theta*f(z))
-- [**DONE**][V. 0.0.3][05.01.2020] Code refactoring and conversion to Python 3; Removed support for Python Control library.
-- [**DONE**][v. 0.0.5][07.01.2020] Add Instrumental Variables (IVs) Support
-- [**In Progress**][-][07.01.2020-] Add Documentation and Latex formulas
+- [**V. 0.0.2**][26.03.2017] Implement the basic VRFT algorithm (1 DOF. offline, linear controller, controller expressed as scalar product theta*f(z))
+- [**V. 0.0.3**][05.01.2020] Code refactoring and conversion to Python 3; Removed support for Python Control library.
+- [**V. 0.0.5**][07.01.2020] Add Instrumental Variables (IVs) Support
+- [**In Progress**][07.01.2020-] Add Documentation and Latex formulas (Milestone v.0.1)
 - [**TODO**] Add MIMO Support
 - [**TODO**] Generalize to other kind of controllers (e.g., neural nets)
 
