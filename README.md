@@ -8,9 +8,11 @@ _Author_: Alessio Russo (PhD Student at KTH - alesssior@kth.se)
 Our code is released under the GPLv3 license (refer to the [LICENSE](https://github.com/rssalessio/PythonVRFT/blob/master/LICENSE) file for details).
 
 ## Requirements
-- Python 3.9.1
-- NumPy 1.19.5
-- SciPy 1.6.0
+To run the library you need atleast Python 3.5.
+
+Other dependencies:
+- NumPy (1.19.5)
+- SciPy (1.6.0)
 
 ## Installation
 Check the requirements, but the following command should install all the packages.
