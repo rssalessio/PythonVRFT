@@ -37,3 +37,13 @@ python -m unittest
 - [**TODO**] Add MIMO Support
 - [**TODO**] Add IV Support
 - [**TODO**] Generalize to other kind of controllers (e.g., neural nets)
+
+## Citations
+If you find this code useful in your research, please, consider citing it:
+>@misc{pythonvrft,
+>  author       = {Alessio Russo},
+>  title        = {Python VRFT Library},
+>  year         = 2020,
+>  doi          = {},
+>  url          = { https://github.com/rssalessio/PythonVRFT }
+>}
