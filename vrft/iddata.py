@@ -61,10 +61,9 @@ class iddata(object):
         else:
             self.y0 = np.array(y0) if not isinstance(y0, np.ndarray) else np.array([y0]).flatten()
 
-            if self.y0.size == 0:
+            if self.y0.size == 0 or self.y0.ndim == None or \
+                    np.allclose(self.y0, 0.):
                 self.y0 = None
-            elif self.y0.ndim == 0:
-                self.y0 = np.expand_dims(self.y0, axis=0)
 
 
     def check(self):

@@ -78,10 +78,10 @@ class TestVRFT(TestCase):
                 ExtendedTF([1], [1,0,0,0], dt=t_step),
                 ExtendedTF([1, 0], [1,1], dt=t_step)]
 
-        ##import pdb
+        #import pdb
         #pdb.set_trace()
         
-        # theta, _, loss, _ = compute_vrft(data, refModel, control, prefilter, iv=True)
+        #theta, _, loss, _ = compute_vrft(data, refModel, control, prefilter, iv=True)
 
 
 

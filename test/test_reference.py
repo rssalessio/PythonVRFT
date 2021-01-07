@@ -52,14 +52,15 @@ class TestReference(TestCase):
         t,y = scipysig.dlsim(sys, u, t)
         y = y[:,0]
         data = iddata(y,u,t_step,[0,0])
-        #wrong initial conditions
-        with self.assertRaises(ValueError):
-            virtualReference(data, num, den)
+        
+        r, _ = virtualReference(data, num, den)
+        for i in range(len(r)):
+            self.assertTrue(np.isclose(r[i], u[i]))
 
-        #wrong initial conditions
         data = iddata(y,u,t_step,[0,0,0])
-        with self.assertRaises(ValueError):
-            virtualReference(data, num, den)
+        r, _ = virtualReference(data, num, den)
+        for i in range(len(r)):
+            self.assertTrue(np.isclose(r[i], u[i]))
 
         #test good data, first order
         data = iddata(y,u,t_step,[0])
@@ -80,3 +81,4 @@ class TestReference(TestCase):
         r, _ = virtualReference(data, num, den)
         for i in range(len(r)):
             self.assertTrue(np.isclose(r[i], u[i]))
+ 

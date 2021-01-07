@@ -38,12 +38,13 @@ def virtualReference(data: iddata, num: np.ndarray, den: np.ndarray) -> np.ndarr
     offset_M = len(num) - M - 1
     offset_N = len(den) - N - 1
 
-    lag = N - M  #number of initial conditions
+    lag = N - M  # number of initial conditions
+    y0 = data.y0
 
-    if (lag > 0 and data.y0 is None):
-        raise ValueError("Wrong initial condition.")
+    if y0 is None:
+        y0 = [0.] * lag
 
-    if (lag != len(data.y0)):
+    if y0 is not None and (lag != len(y0)):
         raise ValueError("Wrong initial condition size.")
 
     reference = np.zeros_like(data.y)
@@ -60,7 +61,7 @@ def virtualReference(data: iddata, num: np.ndarray, den: np.ndarray) -> np.ndarr
             index = k + i - N
             if (index < 0):
                 left_side += den[offset_N +
-                                 abs(i - N)] * data.y0[abs(index) - 1]
+                                 abs(i - N)] * y0[abs(index) - 1]
             else:
                 left_side += den[offset_N + abs(i - N)] * (
                     data.y[index] if index < L else 0)
