@@ -1,3 +1,8 @@
+# utils.py - VRFT utility functions
+#
+# Code author: [Alessio Russo - alessior@kth.se]
+# Last update: 07th January 2020, by alessior@kth.se
+#
 # Copyright [2017-2020] [Alessio Russo - alessior@kth.se]  
 # This file is part of PythonVRFT.
 # PythonVRFT is free software: you can redistribute it and/or modify
@@ -10,13 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with PythonVRFT.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Code author: [Alessio Russo - alessior@kth.se]
-# Last update: 06th January 2020, by alessior@kth.se
-#
+
 
 import numpy as np
 import scipy.signal as scipysig
 from vrft.iddata import iddata
+from typing import overload
 
 def Doperator(p: int, q: int, x: float) -> np.ndarray:
     D = np.zeros((p * q, q))
@@ -24,7 +28,27 @@ def Doperator(p: int, q: int, x: float) -> np.ndarray:
         D[i * p:(i + 1) * p, i] = x
     return D
 
+@overload
+def checkSystem(tf: scipysig.dlti) -> bool:
+    """Returns true if a transfer function is causal
+    Parameters
+    ----------
+    tf : scipy.signal.dlti
+        discrete time rational transfer function
+    """
+
+    return checkSystem(tf.num, tf.den)
+
 def checkSystem(num: np.ndarray, den: np.ndarray) -> bool:
+    """Returns true if a transfer function is causal
+    Parameters
+    ----------
+    num : np.ndarray
+        numerator of the transfer function
+    den : np.ndarray
+        denominator of the transfer function
+
+    """
     try:
         M, N = systemOrder(num, den)
     except ValueError:
@@ -35,7 +59,37 @@ def checkSystem(num: np.ndarray, den: np.ndarray) -> bool:
 
     return True
 
+@overload
+def systemOrder(tf: scipysig.dlti) -> tuple:
+    """Returns the order of the numerator and denominator
+       of a transfer function
+    Parameters
+    ----------
+    tf : scipy.signal.dlti
+        discrete time rational transfer function
+
+    Returns
+    ----------
+    (num, den): tuple
+        Tuple containing the orders
+    """
+    return systemOrder(tf.num, tf.den)
+
 def systemOrder(num: np.ndarray, den: np.ndarray) -> tuple:
+    """Returns the order of the numerator and denominator
+       of a transfer function
+    Parameters
+    ----------
+    num : np.ndarray
+        numerator of the transfer function
+    den : np.ndarray
+        denominator of the transfer function
+
+    Returns
+    ----------
+    (num, den): tuple
+        Tuple containing the orders
+    """
     den = den if isinstance(den, np.ndarray) else np.array([den]).flatten()
     num = num if isinstance(num, np.ndarray) else np.array([num]).flatten()
 
@@ -45,32 +99,23 @@ def systemOrder(num: np.ndarray, den: np.ndarray) -> tuple:
     if den.ndim == 0:
         den = np.expand_dims(den, axis=0)
 
-    N = den.size
-    M = num.size
-
-    denOrder = -1
-    numOrder = -1
-
-    for i, d in enumerate(den):
-        if not np.isclose(d, 0):
-            denOrder = N - i - 1
-            break
-
-    for i, n in enumerate(num):
-        if not np.isclose(n, 0):
-            numOrder = M - i - 1
-            break
-
-    if (denOrder == -1):
-        raise ValueError("Denominator can not be zero.")
-
-    if (numOrder == -1):
-        raise ValueError("Numerator can not be zero.")
-
-    return (numOrder, denOrder)
+    return (np.poly1d(num).order, np.poly1d(den).order)
 
 
 def filter_iddata(data: iddata, L: scipysig.dlti) -> iddata:
+    """Filter data in an iddata object
+    Parameters
+    ----------
+    data : iddata
+        iddata object containing the data to filter
+    L : scipy.signal.dlti
+        Transfer function used to filter the data
+
+    Returns
+    -------
+    data : iddata
+        Filtered iddata object
+    """
     t_start = 0
     t_step = data.ts
     t_end = len(data.y) * t_step
@@ -84,9 +129,25 @@ def filter_iddata(data: iddata, L: scipysig.dlti) -> iddata:
     return data
 
 def deconvolve_signal(T: scipysig.dlti, x: np.ndarray, dt: float) -> np.ndarray:
+    """Deconvolve a signal x using a specified transfer function T
+    Parameters
+    ----------
+    T : scipy.signal.dlti
+        Discrete-time rational transfer function used to
+        deconvolve the signal
+    x : np.ndarray
+        Signal to deconvolve
+    dt: float
+        Sampling time
+
+    Returns
+    -------
+    signal : np.ndarray
+        Deconvolved signal
+    """
     impulse = scipysig.dimpulse(T)[1][0].flatten()
     idx1 = np.argwhere(impulse != 0)[0].item()
     idx2 = np.argwhere(np.isclose(impulse[idx1:], 0.) == True)
     idx2 = -1 if idx2.size == 0 else idx2[0].item()
-    recovered, _ = scipysig.deconvolve(x, impulse[idx1:idx2])
-    return recovered[np.argwhere(impulse != 0)[0].item():]
+    signal, _ = scipysig.deconvolve(x, impulse[idx1:idx2])
+    return signal[np.argwhere(impulse != 0)[0].item():]

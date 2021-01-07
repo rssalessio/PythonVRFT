@@ -58,25 +58,8 @@ class TestUtils(TestCase):
             checkSystem(a,b)
 
     def test_systemOrder(self):
-        with self.assertRaises(ValueError):
-            systemOrder(0, 0)
-
-        with self.assertRaises(ValueError):
-            systemOrder(1, 0)
-
-        with self.assertRaises(ValueError):
-            systemOrder([0], 0)
-
-        with self.assertRaises(ValueError):
-            systemOrder([0], [0])
-
-        with self.assertRaises(ValueError):
-            systemOrder([0, 0], [0, 0])
-
-        with self.assertRaises(ValueError):
-            systemOrder([0], [0, 0])
-
-
+        self.assertEqual(systemOrder(0, 0), (0, 0))
+        self.assertEqual(systemOrder(1, 0), (0, 0))
         self.assertEqual(systemOrder([1],[1]), (0, 0))
         self.assertEqual(systemOrder([1, 1],[1, 1]), (1,1))
         self.assertEqual(systemOrder([1, 1, 3],[1, 1]), (2,1))

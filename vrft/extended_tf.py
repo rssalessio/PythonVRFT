@@ -1,3 +1,11 @@
+# extended_tf.py - Extended definition of the discrete
+# transfer function implemented in scipy.signal.
+# Supports arithmetical operations between transfer function
+# and feedback loop computation
+#
+# Code author: [Alessio Russo - alessior@kth.se]
+# Last update: 07th January 2020, by alessior@kth.se
+#
 # Copyright [2020] [Alessio Russo - alessior@kth.se]  
 # This file is part of PythonVRFT.
 # PythonVRFT is free software: you can redistribute it and/or modify
@@ -10,9 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with PythonVRFT.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Code author: [Alessio Russo - alessior@kth.se]
-# Last update: 06th January 2020, by alessior@kth.se
-#
+
 
 from __future__ import division
 
@@ -25,6 +31,12 @@ from numpy import polymul, polyadd
 
 
 class ExtendedTF(scipysig.ltisys.TransferFunctionDiscrete):
+    """
+    Extended definition of the discrete transfer function implemented in scipy.signal.
+    Supports arithmetical operations between transfer function and feedback loop
+    computation
+    """
+
     def __init__(self, num: np.ndarray, den: np.ndarray, dt: float):
         self._dt = dt
         super().__init__(num, den, dt=dt)
@@ -97,6 +109,7 @@ class ExtendedTF(scipysig.ltisys.TransferFunctionDiscrete):
             return ExtendedTF(numer, denom, dt=self._dt)
 
     def feedback(self):
+        """ Computes T(z)/(1+T(z)) """
         num = self.num
         den = self.den
         den = polyadd(num, den)
