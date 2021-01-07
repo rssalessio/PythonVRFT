@@ -40,6 +40,7 @@ python -m unittest
 - [**In Progress**][07.01.2020-] Add Documentation and Latex formulas
 - [**TODO**] Add MIMO Support
 - [**TODO**] Generalize to other kind of controllers (e.g., neural nets)
+- [**TODO**] Add Cython support
 
 ## Citations
 If you find this code useful in your research, please, consider citing it:

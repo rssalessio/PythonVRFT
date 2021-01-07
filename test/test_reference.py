@@ -53,15 +53,10 @@ class TestReference(TestCase):
         y = y[:,0]
         data = iddata(y,u,t_step,[0,0])
         
-        r, _ = virtualReference(data, num, den)
-        for i in range(len(r)):
-            self.assertTrue(np.isclose(r[i], u[i]))
-
-        data = iddata(y,u,t_step,[0,0,0])
-        r, _ = virtualReference(data, num, den)
-        for i in range(len(r)):
-            self.assertTrue(np.isclose(r[i], u[i]))
-
+        # wrong initial conditions
+        with self.assertRaises(ValueError):
+            r, _ = virtualReference(data, num, den)
+    
         #test good data, first order
         data = iddata(y,u,t_step,[0])
 

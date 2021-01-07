@@ -1,4 +1,4 @@
-# Copyright [2017-2020] [Alessio Russo - alessior@kth.se]  
+# Copyright [2020] [Alessio Russo - alessior@kth.se]  
 # This file is part of PythonVRFT.
 # PythonVRFT is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,7 +11,7 @@
 # along with PythonVRFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Code author: [Alessio Russo - alessior@kth.se]
-# Last update: 06th January 2020, by alessior@kth.se
+# Last update: 07th January 2020, by alessior@kth.se
 #
 
 import numpy as np
@@ -43,7 +43,7 @@ num = [0.5]
 den = [1, -0.9]
 sys = ExtendedTF(num, den, dt=t_step)
 t, y = scipysig.dlsim(sys, u, t)
-y = y[:, 0]
+y = y.flatten() + 0.5 * np.random.normal(size = t.size)
 #y += generateNoise(t)
 data = iddata(y, u, t_step, [0])
 
@@ -57,8 +57,9 @@ base = [ExtendedTF([1], [1, -1], dt=t_step),
 
 #Experiment filter
 L = refModel * (1 -  refModel)
+
 #VRFT
-theta, r, loss, C = compute_vrft(data, refModel, base, L)
+theta, r, loss, C = compute_vrft(data, refModel, base, L, iv=True)
 
 #Obtained controller
 print("Controller: {}".format(C))

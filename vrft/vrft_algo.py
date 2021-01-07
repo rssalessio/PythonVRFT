@@ -111,28 +111,22 @@ def calc_minimum(data: iddata, phi1: np.ndarray,
     phi2 = np.mat(phi2) if phi2 is not None else phi1
     nk = phi1.shape[1]
     #least squares
-    theta = np.linalg.inv(phi2.T @ phi1) @ phi2.T
+    theta = np.linalg.inv(phi1.T @ phi2) @ phi1.T
 
     L = theta.shape[1]
     theta = np.array(np.dot(theta, data.u[:L])).flatten()
     return theta
 
 def control_response(data: iddata, error: np.ndarray, control: list):
-    t_start = 0
     t_step = data.ts
-    t_end = len(error) * t_step
-    t = np.arange(t_start, t_end, t_step)
+    t = [i * t_step for i in range(len(error))]
 
-    phi = np.zeros((len(control), len(t)))
-    for i in range(len(control)):
+    phi = [None] * len(control)
+    for i, c in enumerate(control):
+        _, y = scipysig.dlsim(c, error, t)
+        phi[i] = y.flatten()
 
-        t, y = scipysig.dlsim(control[i], error, t)
-        if y.size != error.size:
-            phi[i, :] = [0, y.flatten()]
-        else:
-            phi[i, :] = y.flatten()
-
-    phi = phi.T
+    phi = np.vstack(phi).T
     return phi
 
 def compute_vrft(data: iddata, refModel: scipysig.dlti,
@@ -219,6 +213,9 @@ def compute_vrft(data: iddata, refModel: scipysig.dlti,
         phi1 = control_response(d1, np.subtract(r1, d1.y[:n1]), control)
         phi2 = control_response(d2, np.subtract(r2, d2.y[:n2]), control)
         theta = calc_minimum(data, phi1, phi2)
+
+        phi = np.concatenate([phi1, phi2])
+        r = np.concatenate([r1, r2])
 
     # Compute VRFT loss
     loss = compute_vrft_loss(data, phi, theta)

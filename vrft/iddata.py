@@ -57,13 +57,11 @@ class iddata(object):
         self.ts = float(ts)
 
         if y0 is None:
-            self.y0 = None
+            raise ValueError("y0: {} can't be None.".format(y0))
         else:
             self.y0 = np.array(y0) if not isinstance(y0, np.ndarray) else np.array([y0]).flatten()
-
-            if self.y0.size == 0 or self.y0.ndim == None or \
-                    np.allclose(self.y0, 0.):
-                self.y0 = None
+            if self.y0.size == 0 or self.y0.ndim == 0:
+                raise ValueError("y0 can't be None.")
 
 
     def check(self):
@@ -78,7 +76,7 @@ class iddata(object):
             raise ValueError("Sampling time can not be negative.")
 
         if (self.y0 is None):
-            return True
+            raise ValueError("Initial condition can't be zero")
 
         return True
 
