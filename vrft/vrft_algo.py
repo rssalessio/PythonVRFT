@@ -1,4 +1,9 @@
-# Copyright [2017-2020] [Alessio Russo - alessior@kth.se]  
+# vrft_algo.py - VRFT algorithm implementation
+#
+# Code author: [Alessio Russo - alessior@kth.se]
+# Last update: 07th January 2020, by alessior@kth.se
+#
+# Copyright(c) [2017-2020] [Alessio Russo - alessior@kth.se]  
 # This file is part of PythonVRFT.
 # PythonVRFT is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -10,9 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with PythonVRFT.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Code author: [Alessio Russo - alessior@kth.se]
-# Last update: 06th January 2020, by alessior@kth.se
-#
+
 
 from vrft.iddata import iddata
 from vrft.utils import systemOrder, checkSystem, \
@@ -110,16 +113,50 @@ def control_response(data: iddata, error: np.ndarray, control: list):
     phi = phi.T
     return phi
 
-def compute_vrft(data: iddata, refModel: scipysig.dlti, control: list, L: scipysig.dlti):
+def compute_vrft(data: iddata, refModel: scipysig.dlti,
+                 control: list, prefilter: scipysig.dlti = None):
+    """Compute VRFT Controller
+    Parameters
+    ----------
+    data : iddata
+        iddata object containing data from experiments
+    refModel : scipy.signal.dlti
+        Discrete Transfer Function representing the reference model
+    control : list
+        list of discrete transfer functions, representing the control basis
+    prefilter : scipy.signal.dlti, optional
+        Filter used to pre-filter the data
 
-    data = filter_iddata(data, L)
+    Returns
+    -------
+    theta : np.ndarray
+        Coefficients computed for the control basis
+    r : np.ndarray
+        Virtual reference signal
+    phi: np.ndarray
+        Toeplitz matrix used to compute theta
+    loss: float
+        VRFT loss
+    final_control: scipy.signal.dlti
+        Final controller
+    """
+
+    # Prefilter the data
+    if prefilter is not None and isinstance(prefilter, scipysig.dlti):
+        data = filter_iddata(data, prefilter)
+
+    # Compute virtual reference
     r, n = virtualReference(data,
                          refModel.num,
                          refModel.den)
 
+    # Compute control response given the virtual reference
     phi = control_response(data, np.subtract(r, data.y[:n]), control)
+
+    # Compute MSE minimizer
     theta, phi = calc_minimum(data, phi)
     loss = compute_vrft_loss(data, phi, theta)
 
+    # Final controller
     final_control = np.dot(theta, control)
     return theta, r, phi, loss, final_control
