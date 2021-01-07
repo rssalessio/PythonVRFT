@@ -14,25 +14,21 @@ Our code is released under the GPLv3 license (refer to the [LICENSE](https://git
 
 ## Installation
 Check the requirements, but the following command should install all the packages.
-------
 Run the following command from  root folder:
 ```sh
 pip install . 
 ``` 
 
 ## Examples
-------
 Examples are located in the examples/ folder. At the moment only 1 example is available.
 
 ## Tests
-------
 To execute tests run the following command
 ```sh
 python -m unittest
 ``` 
 
 ## Changelog
-------
 - [**DONE - V0.0.2**][26.03.2017] Implement the basic VRFT algorithm (1 DOF. offline, linear controller, controller expressed as scalar product theta*f(z))
 - [**DONE - V0.0.3**][05.01.2020] Code refactoring and conversion to Python 3; Removed support for Python Control library.
 - [**In Progress**][07.01.2020-] Add Documentation and Latex formulas
