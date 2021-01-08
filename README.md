@@ -30,6 +30,8 @@ Check example3 to see usage of instrumental variables.
 In general the code has the following structure
 ```python
 from vrft import ExtendedTF    # Discrete transfer function (inherits from the scipy.signal.dlti class)
+							   # Allows to sum/multiply/divide transfer functions and compute the feedback
+							   # loop
 from vrft import iddata        # object used to store input/output data
 from vrft import compute_vrft  # VRFT algorithm
 
@@ -37,14 +39,14 @@ from vrft import compute_vrft  # VRFT algorithm
 dt = 0.1  # sampling time
 
 # Define a reference model
-ref_model = ExtendedTF([0.6], [1, -0.4], dt=t_step)   # 0.6/ (z-0.4)
+ref_model = ExtendedTF([0.6], [1, -0.4], dt=dt)   # 0.6/ (z-0.4)
 
 # Define pre-filter
 pre_filter = (1 - ref_model) * ref_model
 
 # Define control base (PI control)
-control = [ExtendedTF([1], [1, -1], dt=t_step),  # 1/(z-1)
-        ExtendedTF([1, 0], [1, -1], dt=t_step)]  # z/(z-1)
+control = [ExtendedTF([1], [1, -1], dt=dt),  # 1/(z-1)
+        ExtendedTF([1, 0], [1, -1], dt=dt)]  # z/(z-1)
 
 # Generate input/output data from a system
 u = ....  # Generate input
