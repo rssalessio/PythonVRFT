@@ -18,9 +18,8 @@ Other dependencies:
 - SciPy (1.6.0)
 
 ## Installation
-Check the requirements, but the following command should install all the packages.
-Run the following command from  root folder:
-```sh
+- Install last stable version ```sh pip install pythonvrft```
+- Install from source: ```sh
 pip install . 
 ``` 
 
