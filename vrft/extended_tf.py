@@ -19,15 +19,12 @@
 # along with PythonVRFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-
 from __future__ import division
 
 import numpy as np
 import scipy.signal as scipysig
-
 from scipy.signal.ltisys import TransferFunction as TransFun
 from numpy import polymul, polyadd
-
 
 
 class ExtendedTF(scipysig.ltisys.TransferFunctionDiscrete):
@@ -80,7 +77,7 @@ class ExtendedTF(scipysig.ltisys.TransferFunctionDiscrete):
                 numer = polyadd(self.num, other.num)
                 denom = self.den
             else:
-                numer = polyadd(polymul(self.num,other.den), polymul(self.den,other.num))
+                numer = polyadd(polymul(self.num, other.den), polymul(self.den, other.num))
                 denom = polymul(self.den, other.den)
             return ExtendedTF(numer, denom, dt=self._dt)
 
@@ -92,9 +89,9 @@ class ExtendedTF(scipysig.ltisys.TransferFunctionDiscrete):
                 numer = polyadd(self.num, -other.num)
                 denom = self.den
             else:
-                numer = polyadd(polymul(self.num,other.den),-polymul(self.den,other.num))
-                denom = polymul(self.den,other.den)
-            return ExtendedTF(numer,denom, dt=self._dt)
+                numer = polyadd(polymul(self.num, other.den), -polymul(self.den, other.num))
+                denom = polymul(self.den, other.den)
+            return ExtendedTF(numer, denom, dt=self._dt)
 
     def __rsub__(self, other):
         if type(other) in [int, float]:
@@ -104,8 +101,8 @@ class ExtendedTF(scipysig.ltisys.TransferFunctionDiscrete):
                 numer = polyadd(self.num, -other.num)
                 denom = self.den
             else:
-                numer = polyadd(polymul(self.num,other.den), -polymul(self.den,other.num))
-                denom = polymul(self.den,other.den)
+                numer = polyadd(polymul(self.num, other.den), -polymul(self.den, other.num))
+                denom = polymul(self.den, other.den)
             return ExtendedTF(numer, denom, dt=self._dt)
 
     def feedback(self):
@@ -116,7 +113,6 @@ class ExtendedTF(scipysig.ltisys.TransferFunctionDiscrete):
         self = ExtendedTF(num, den, dt=self.dt)
         return self
 
-    # sheer laziness: symmetric behaviour for commutative operators
     __rmul__ = __mul__
     __radd__ = __add__
 

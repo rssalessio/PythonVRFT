@@ -16,14 +16,14 @@
 # along with PythonVRFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-
 from unittest import TestCase
-from vrft.utils import *
-from vrft.extended_tf import ExtendedTF
-from vrft.vrft_algo import virtualReference
-from vrft.iddata import iddata
 import numpy as np
 import scipy.signal as scipysig
+from vrft.utils import *
+from vrft.extended_tf import ExtendedTF
+from vrft.vrft_algo import virtual_reference
+from vrft.iddata import iddata
+
 
 class TestUtils(TestCase):
     def test_deconvolve(self):
@@ -36,41 +36,41 @@ class TestUtils(TestCase):
         _, y = scipysig.dlsim(sys, u, t)
         y = y[:, 0]
         data = iddata(y, u, t_step, [0])
-        r1, _ = virtualReference(data, sys.num, sys.den)
+        r1, _ = virtual_reference(data, sys.num, sys.den)
         r2 = deconvolve_signal(sys, data.y)
         self.assertTrue(np.linalg.norm(r2-r1[:r2.size], np.infty) <  1e-3)
 
 
-    def test_checkSystem(self):
+    def test_check_system(self):
         a = [1, 0, 1]
         b = [1, 0, 2]
-        self.assertTrue(checkSystem(a,b))
+        self.assertTrue(check_system(a,b))
 
         b = [1, 0, 2, 4]
-        self.assertTrue(checkSystem(a,b))
+        self.assertTrue(check_system(a,b))
 
         a = [1]
-        self.assertTrue(checkSystem(a,b))
+        self.assertTrue(check_system(a,b))
 
         a = [1, 0, 1]
         b = [1,0]
         with self.assertRaises(ValueError):
-            checkSystem(a,b)
+            check_system(a,b)
 
         b = [1]
         with self.assertRaises(ValueError):
-            checkSystem(a,b)
+            check_system(a,b)
 
-    def test_systemOrder(self):
-        self.assertEqual(systemOrder(0, 0), (0, 0))
-        self.assertEqual(systemOrder(1, 0), (0, 0))
-        self.assertEqual(systemOrder([1],[1]), (0, 0))
-        self.assertEqual(systemOrder([1, 1],[1, 1]), (1,1))
-        self.assertEqual(systemOrder([1, 1, 3],[1, 1]), (2,1))
-        self.assertEqual(systemOrder([1, 1, 3],[1]), (2,0))
-        self.assertEqual(systemOrder([1, 1],[1, 1, 1]), (1,2))
-        self.assertEqual(systemOrder([1],[1, 1, 1]), (0,2))
-        self.assertEqual(systemOrder([0, 1],[1, 1, 1]), (0,2))
-        self.assertEqual(systemOrder([0,0,1],[1, 1, 1]), (0,2))
-        self.assertEqual(systemOrder([0,0,1],[0, 1, 1, 1]), (0,2))
-        self.assertEqual(systemOrder([0,0,1],[0, 0, 1, 1, 1]), (0,2))
+    def test_system_order(self):
+        self.assertEqual(system_order(0, 0), (0, 0))
+        self.assertEqual(system_order(1, 0), (0, 0))
+        self.assertEqual(system_order([1],[1]), (0, 0))
+        self.assertEqual(system_order([1, 1],[1, 1]), (1,1))
+        self.assertEqual(system_order([1, 1, 3],[1, 1]), (2,1))
+        self.assertEqual(system_order([1, 1, 3],[1]), (2,0))
+        self.assertEqual(system_order([1, 1],[1, 1, 1]), (1,2))
+        self.assertEqual(system_order([1],[1, 1, 1]), (0,2))
+        self.assertEqual(system_order([0, 1],[1, 1, 1]), (0,2))
+        self.assertEqual(system_order([0,0,1],[1, 1, 1]), (0,2))
+        self.assertEqual(system_order([0,0,1],[0, 1, 1, 1]), (0,2))
+        self.assertEqual(system_order([0,0,1],[0, 0, 1, 1, 1]), (0,2))

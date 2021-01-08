@@ -16,19 +16,20 @@
 # along with PythonVRFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-
+from typing import overload
 import numpy as np
 import scipy.signal as scipysig
-from typing import overload
+
 
 def Doperator(p: int, q: int, x: float) -> np.ndarray:
+    """ DOperator, used to compute the overall Toeplitz matrix """
     D = np.zeros((p * q, q))
     for i in range(q):
         D[i * p:(i + 1) * p, i] = x
     return D
 
 @overload
-def checkSystem(tf: scipysig.dlti) -> bool:
+def check_system(tf: scipysig.dlti) -> bool:
     """Returns true if a transfer function is causal
     Parameters
     ----------
@@ -36,9 +37,9 @@ def checkSystem(tf: scipysig.dlti) -> bool:
         discrete time rational transfer function
     """
 
-    return checkSystem(tf.num, tf.den)
+    return check_system(tf.num, tf.den)
 
-def checkSystem(num: np.ndarray, den: np.ndarray) -> bool:
+def check_system(num: np.ndarray, den: np.ndarray) -> bool:
     """Returns true if a transfer function is causal
     Parameters
     ----------
@@ -49,7 +50,7 @@ def checkSystem(num: np.ndarray, den: np.ndarray) -> bool:
 
     """
     try:
-        M, N = systemOrder(num, den)
+        M, N = system_order(num, den)
     except ValueError:
         raise
 
@@ -59,7 +60,7 @@ def checkSystem(num: np.ndarray, den: np.ndarray) -> bool:
     return True
 
 @overload
-def systemOrder(tf: scipysig.dlti) -> tuple:
+def system_order(tf: scipysig.dlti) -> tuple:
     """Returns the order of the numerator and denominator
        of a transfer function
     Parameters
@@ -72,9 +73,9 @@ def systemOrder(tf: scipysig.dlti) -> tuple:
     (num, den): tuple
         Tuple containing the orders
     """
-    return systemOrder(tf.num, tf.den)
+    return system_order(tf.num, tf.den)
 
-def systemOrder(num: np.ndarray, den: np.ndarray) -> tuple:
+def system_order(num: np.ndarray, den: np.ndarray) -> tuple:
     """Returns the order of the numerator and denominator
        of a transfer function
     Parameters

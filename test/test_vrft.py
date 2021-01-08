@@ -16,13 +16,13 @@
 # along with PythonVRFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-
 from unittest import TestCase
+import numpy as np
+import scipy.signal as scipysig
 from vrft.iddata import *
 from vrft.vrft_algo import *
 from vrft.extended_tf import ExtendedTF
-import numpy as np
-import scipy.signal as scipysig
+
 
 class TestVRFT(TestCase):
     def test_vrft(self):

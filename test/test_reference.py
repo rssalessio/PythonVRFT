@@ -3,6 +3,7 @@
 # Code author: [Alessio Russo - alessior@kth.se]
 # Last update: 07th January 2021, by alessior@kth.se
 #
+# Copyright [2017-2021] [Alessio Russo - alessior@kth.se]
 # This file is part of PythonVRFT.
 # PythonVRFT is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,29 +17,30 @@
 #
 
 from unittest import TestCase
+import numpy as np
+import scipy.signal as scipysig
 from vrft.iddata import *
 from vrft.utils import *
 from vrft.vrft_algo import *
-import numpy as np
-import scipy.signal as scipysig
+
 
 class TestReference(TestCase):
     def test_virtualReference(self):
         # wrong system
         with self.assertRaises(ValueError):
-            virtualReference(1, 1, 0)
+            virtual_reference(1, 1, 0)
 
         # cant be constant the system
         with self.assertRaises(ValueError):
-            virtualReference([1],[1], 0)
+            virtual_reference([1],[1], 0)
 
         # cant be constant the system
         with self.assertRaises(ValueError):
-            virtualReference(np.array(2), np.array(3), 0)
+            virtual_reference(np.array(2), np.array(3), 0)
 
         # wrong data
         with self.assertRaises(ValueError):
-            virtualReference([1], [1, 1], 0)
+            virtual_reference([1], [1, 1], 0)
 
         t_start = 0
         t_end = 10
@@ -55,12 +57,12 @@ class TestReference(TestCase):
         
         # wrong initial conditions
         with self.assertRaises(ValueError):
-            r, _ = virtualReference(data, num, den)
+            r, _ = virtual_reference(data, num, den)
     
         #test good data, first order
         data = iddata(y,u,t_step,[0])
 
-        r, _ = virtualReference(data, num, den)
+        r, _ = virtual_reference(data, num, den)
 
         for i in range(len(r)):
             self.assertTrue(np.isclose(r[i], u[i]))
@@ -73,7 +75,7 @@ class TestReference(TestCase):
         y = y[:,0]
         data = iddata(y,u,t_step,[0,0])
         #test second order
-        r, _ = virtualReference(data, num, den)
+        r, _ = virtual_reference(data, num, den)
         for i in range(len(r)):
             self.assertTrue(np.isclose(r[i], u[i]))
  

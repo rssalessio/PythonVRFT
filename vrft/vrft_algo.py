@@ -16,21 +16,56 @@
 # along with PythonVRFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+from typing import overload
+import numpy as np
+import scipy as sp
+import scipy.signal as scipysig
 
 from vrft.iddata import iddata
-from vrft.utils import systemOrder, checkSystem, \
+from vrft.utils import system_order, check_system, \
     filter_signal
-import numpy as np
-import scipy.signal as scipysig
-import scipy as sp
 
-def virtualReference(data: iddata, num: np.ndarray, den: np.ndarray) -> np.ndarray:
+
+@overload 
+def virtual_reference(data: iddata, L: scipysig.dlti) -> np.ndarray:
+    """Compute virtual reference signal by performing signal deconvolution
+    Parameters
+    ----------
+    data : iddata
+        iddata object containing data from experiments
+    L : scipy.signal.dlti
+        Discrete transfer function
+
+    Returns
+    -------
+    r : np.ndarray
+        virtual reference signal
+    """
+    return virtual_reference(data, L.num, L.den)
+
+
+def virtual_reference(data: iddata, num: np.ndarray, den: np.ndarray) -> np.ndarray:
+    """Compute virtual reference signal by performing signal deconvolution
+    Parameters
+    ----------
+    data : iddata
+        iddata object containing data from experiments
+    num : np.ndarray
+        numerator of a discrete transfer function
+    phi2 : np.ndarray
+        denominator of a discrete transfer function
+
+    Returns
+    -------
+    r : np.ndarray
+        virtual reference signal
+    """
     try:
-        checkSystem(num, den)
+        check_system(num, den)
     except ValueError:
         raise ValueError('Error in check system')
 
-    M, N = systemOrder(num, den)
+    M, N = system_order(num, den)
 
     if (N == 0) and (M == 0):
         raise ValueError("The reference model can not be a constant.")
@@ -86,15 +121,12 @@ def virtualReference(data: iddata, num: np.ndarray, den: np.ndarray) -> np.ndarr
     return reference[:-lag], len(reference[:-lag])
 
 
-def compute_vrft_loss(data: iddata, phi: np.ndarray, theta: np.ndarray):
+def compute_vrft_loss(data: iddata, phi: np.ndarray, theta: np.ndarray) -> float:
     z = np.dot(phi, theta.T).flatten()
-    # import pdb
-    # pdb.set_trace()
-    L = z.size
-    return np.linalg.norm(data.u[:L] - z)**2 / L
+    return np.linalg.norm(data.u[:z.size] - z) ** 2 / z.size
 
 def calc_minimum(data: iddata, phi1: np.ndarray,
-                 phi2: np.ndarray = None):
+                 phi2: np.ndarray = None) -> np.ndarray:
     """Compute least squares minimum
     Parameters
     ----------
@@ -119,7 +151,7 @@ def calc_minimum(data: iddata, phi1: np.ndarray,
         theta = (np.linalg.inv(phi2.T @ phi1) @ phi2.T).dot(data.u[:L])
     return theta.flatten()
 
-def control_response(data: iddata, error: np.ndarray, control: list):
+def control_response(data: iddata, error: np.ndarray, control: list) -> np.ndarray:
     t_step = data.ts
     t = [i * t_step for i in range(len(error))]
 
@@ -161,6 +193,8 @@ def compute_vrft(data: iddata, refModel: scipysig.dlti,
     final_control: scipy.signal.dlti
         Final controller
     """
+
+    # Check the data
     if not isinstance(data, iddata):
         if not isinstance(data, list):
             raise ValueError('data should be an iddata object or a list of iddata objects')
@@ -182,12 +216,13 @@ def compute_vrft(data: iddata, refModel: scipysig.dlti,
 
 
     if not iv:
+        # No instrumental variable routine
         if isinstance(data, list):
             data = data[0]
         data.check()
 
         # Compute virtual reference
-        r, n = virtualReference(data, refModel.num, refModel.den)
+        r, n = virtual_reference(data, refModel.num, refModel.den)
 
         # Compute control response given the virtual reference
         phi = control_response(data, np.subtract(r, data.y[:n]), control)
@@ -195,38 +230,37 @@ def compute_vrft(data: iddata, refModel: scipysig.dlti,
         # Compute MSE minimizer
         theta = calc_minimum(data, phi)
     else:
+        # Instrumental variable routine
+
         # Retrieve the two datasets
         if isinstance(data, list):
             d1 = data[0]
             d2 = data[1]
-            d1.check()
-            d2.check()
             # check if the two datasets have same size
             if d1.y.size != d2.y.size:
                 raise ValueError('The two datasets should have same size!')
         else:
             raise ValueError('To use IV the data should be a list of iddata objects')
 
-        r1, n1 = virtualReference(d1, refModel.num, refModel.den)
-        r2, n2 = virtualReference(d2, refModel.num, refModel.den)
+        # Compute virtual reference
+        r1, n1 = virtual_reference(d1, refModel.num, refModel.den)
+        r2, n2 = virtual_reference(d2, refModel.num, refModel.den)
+
+        # Compute control response
         phi1 = control_response(d1, np.subtract(r1, d1.y[:n1]), control)
         phi2 = control_response(d2, np.subtract(r2, d2.y[:n2]), control)
-        
 
-        # import pdb
-        # pdb.set_trace()
-        if isinstance(data, list):
-            phi = phi1
-            data = data[0]
-            r = r1
-        else:
-            phi = np.concatenate([phi1, phi2])
-            r = np.concatenate([r1, r2])
+        # We use the first dataset to compute statistics (e.g. VRFT Loss)
+        phi = phi1
+        data = data[0]
+        r = r1
 
+        # Compute MSE minimizer
         theta = calc_minimum(data, phi1, phi2)
 
     # Compute VRFT loss
     loss = compute_vrft_loss(data, phi, theta)
+
     # Final controller
     final_control = np.dot(theta, control)
 

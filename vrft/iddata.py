@@ -17,10 +17,10 @@
 # along with PythonVRFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-
 import numpy as np
 import scipy.signal as scipysig
 from vrft.utils import filter_signal
+
 
 class iddata(object):
     """

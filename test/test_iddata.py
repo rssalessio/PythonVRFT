@@ -16,11 +16,11 @@
 # along with PythonVRFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-
-from unittest import TestCase
-from vrft.iddata import iddata
 import numpy as np
 import scipy.signal as scipysig
+from unittest import TestCase
+from vrft.iddata import iddata
+
 
 class TestIDData(TestCase):
     def test_type(self):
