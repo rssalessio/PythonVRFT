@@ -1,4 +1,4 @@
-# PythonVRFT Library - Version 0.0.5
+# PythonVRFT Library - Version 0.0.6
 VRFT Adaptive Control Library written in Python. Aim of this library is to provide an implementation of the VRFT (Virtual Reference Feedback Tuning) algorithm.
 
 You can find the package also at the following [link](https://pypi.org/project/pythonvrft/)
@@ -22,9 +22,43 @@ Other dependencies:
 - Install from source: git clone this repo and from the root folder execute the command ```pip install .```
 
 ## Usage/Examples
-You can import the library by typing ```import vrft``` in your code.
+You can import the library by typing ```python import vrft``` in your code.
+
 To learn how to use the library, check the examples located in the examples/ folder. At the moment there are examples available. 
 Check example3 to see usage of instrumental variables.
+
+In general the code has the following structure
+```python
+from vrft import ExtendedTF    # Discrete transfer function (inherits from the scipy.signal.dlti class)
+from vrft import iddata        # object used to store input/output data
+from vrft import compute_vrft  # VRFT algorithm
+
+# Parameters
+dt = 0.1  # sampling time
+
+# Define a reference model
+ref_model = ExtendedTF([0.6], [1, -0.4], dt=t_step)   # 0.6/ (z-0.4)
+
+# Define pre-filter
+pre_filter = (1 - ref_model) * ref_model
+
+# Define control base (PI control)
+control = [ExtendedTF([1], [1, -1], dt=t_step),  # 1/(z-1)
+        ExtendedTF([1, 0], [1, -1], dt=t_step)]  # z/(z-1)
+
+# Generate input/output data from a system
+u = ....  # Generate input
+y = ....  # measured output
+
+# Create an iddata object
+y0 = ... # initial conditions of the system (the length depends on the order of the reference model)
+data = iddata(y, u, dt, y0)
+
+# Compute VRFT
+# theta is the vector of parameters that parametrizes the control base
+# C is the final controller (computed as control.dot(theta))
+theta, _, _, C = compute_vrft(data, ref_model, control, pre_filter)
+```
 
 ## Tests
 To execute tests run the following command

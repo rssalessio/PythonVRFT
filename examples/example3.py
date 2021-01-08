@@ -30,7 +30,7 @@ from vrft import *
 t_start = 0
 t_end = 10
 dt = 1e-2
-t = np.array([i * dt for i in range(int(t_end/dt    ))])
+t = np.array([i * dt for i in range(int(t_end/dt))])
 
 #Experiment
 num = [0.5]
@@ -88,7 +88,7 @@ yc_noiv = yc_noiv.flatten()
 yc_iv = yc_iv.flatten()
 
 fig, ax = plt.subplots(4, sharex=True, figsize=(12,8), dpi= 100, facecolor='w', edgecolor='k')
-ax[0].plot(t, yr,label='Ref System')
+ax[0].plot(t, yr,label='Reference System')
 ax[0].plot(t, yc_iv, label='CL System - IV')
 ax[0].plot(t, yc_noiv, label='CL System - No IV')
 ax[0].set_title('CL Systems response')

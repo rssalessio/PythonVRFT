@@ -11,7 +11,7 @@
 # along with PythonVRFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Code author: [Alessio Russo - alessior@kth.se]
-# Last update: 06th January 2020, by alessior@kth.se
+# Last update: 08th January 2020, by alessior@kth.se
 #
 
 import numpy as np
@@ -75,7 +75,7 @@ yr = np.array(yr).flatten()
 ys = np.array(ys).flatten()
 yc = np.array(yc).flatten()
 fig, ax = plt.subplots(4, sharex=True, figsize=(12,8), dpi= 100, facecolor='w', edgecolor='k')
-ax[0].plot(t, yr,label='Ref System')
+ax[0].plot(t, yr,label='Reference System')
 ax[0].plot(t, yc, label='CL System')
 ax[0].set_title('Systems response')
 ax[0].grid(True)
