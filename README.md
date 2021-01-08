@@ -6,7 +6,7 @@ You can find the package also at the following [link](https://pypi.org/project/p
 _Author_: Alessio Russo (PhD Student at KTH - alesssior@kth.se)
 
 
-![alt tag](https://github.com/rssalessio/PythonVRFT/blob/master/examples/example_2.png)
+![alt tag](https://github.com/rssalessio/PythonVRFT/blob/master/examples/example2.png)
 ## License
 Our code is released under the GPLv3 license (refer to the [LICENSE](https://github.com/rssalessio/PythonVRFT/blob/master/LICENSE) file for details).
 
