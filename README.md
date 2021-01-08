@@ -25,7 +25,8 @@ pip install .
 ``` 
 
 ## Examples
-Examples are located in the examples/ folder. At the moment 2 examples are available. One without instrumental variables and one using instrumental variables.
+Examples are located in the examples/ folder. At the moment there are examples available. 
+Check example3 to see usage of instrumental variables.
 
 ## Tests
 To execute tests run the following command
@@ -36,7 +37,7 @@ python -m unittest
 ## Changelog
 - [**V. 0.0.2**][26.03.2017] Implement the basic VRFT algorithm (1 DOF. offline, linear controller, controller expressed as scalar product theta*f(z))
 - [**V. 0.0.3**][05.01.2020] Code refactoring and conversion to Python 3; Removed support for Python Control library.
-- [**V. 0.0.5**][07.01.2020] Add Instrumental Variables (IVs) Support
+- [**V. 0.0.5**][08.01.2020] Add Instrumental Variables (IVs) Support
 - [**In Progress**][07.01.2020-] Add Documentation and Latex formulas
 - [**TODO**] Add MIMO Support
 - [**TODO**] Generalize to other kind of controllers (e.g., neural nets)
