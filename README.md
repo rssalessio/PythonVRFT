@@ -39,14 +39,14 @@ from vrft import compute_vrft  # VRFT algorithm
 dt = 0.1  # sampling time
 
 # Define a reference model
-ref_model = ExtendedTF([0.6], [1, -0.4], dt=dt)   # 0.6/ (z-0.4)
+ref_model = ExtendedTF([0.6], [1, -0.4], dt=dt)   # Transfer function 0.6/ (z-0.4)
 
 # Define pre-filter
 pre_filter = (1 - ref_model) * ref_model
 
 # Define control base (PI control)
-control = [ExtendedTF([1], [1, -1], dt=dt),  # 1/(z-1)
-        ExtendedTF([1, 0], [1, -1], dt=dt)]  # z/(z-1)
+control = [ExtendedTF([1], [1, -1], dt=dt),     # Transfer function 1/(z-1)
+           ExtendedTF([1, 0], [1, -1], dt=dt)]  # Transfer function z/(z-1)
 
 # Generate input/output data from a system
 u = ....  # Generate input
