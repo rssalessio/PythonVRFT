@@ -21,8 +21,9 @@ Other dependencies:
 - Install last stable version: execute the command ``` pip install pythonvrft```
 - Install from source: git clone this repo and from the root folder execute the command ```pip install .```
 
-## Examples
-Examples are located in the examples/ folder. At the moment there are examples available. 
+## Usage/Examples
+You can import the library by typing ```import vrft``` in your code.
+To learn how to use the library, check the examples located in the examples/ folder. At the moment there are examples available. 
 Check example3 to see usage of instrumental variables.
 
 ## Tests
