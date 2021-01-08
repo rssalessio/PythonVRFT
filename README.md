@@ -18,10 +18,8 @@ Other dependencies:
 - SciPy (1.6.0)
 
 ## Installation
-- Install last stable version ```sh pip install pythonvrft```
-- Install from source: ```sh
-pip install . 
-``` 
+- Install last stable version: execute the command ``` pip install pythonvrft```
+- Install from source: git clone this repo and from the root folder execute the command ```pip install .```
 
 ## Examples
 Examples are located in the examples/ folder. At the moment there are examples available. 
