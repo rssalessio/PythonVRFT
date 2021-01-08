@@ -5,7 +5,7 @@ You can find the package also at the following [link](https://pypi.org/project/p
 
 _Author_: Alessio Russo (PhD Student at KTH - alessior@kth.se)
 
-_Collaborators_: ...
+_Contributors_: Alexander Berndt
 
 
 ![alt tag](https://github.com/rssalessio/PythonVRFT/blob/master/examples/example2.png)
@@ -75,6 +75,7 @@ python -m unittest
 - [**V. 0.0.3**][05.01.2021] Code refactoring and conversion to Python 3; Removed support for Python Control library.
 - [**V. 0.0.5**][08.01.2021] Add Instrumental Variables (IVs) Support
 - [**In Progress**][07.01.2021-] Add Documentation and Latex formulas
+- [**In Progress**] Add 2 Degrees of Freedom support
 - [**TODO**] Add MIMO Support
 - [**TODO**] Generalize to other kind of controllers (e.g., neural nets)
 - [**TODO**] Add Cython support
