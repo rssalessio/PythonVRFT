@@ -61,7 +61,7 @@ theta, _, _, C = compute_vrft(data, ref_model, control, pre_filter)
 ```
 
 ## Tests
-To execute tests run the following command
+To execute tests run the following command from the root folder of the repo
 ```sh
 python -m unittest
 ``` 
