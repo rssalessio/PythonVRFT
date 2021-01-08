@@ -126,13 +126,13 @@ def compute_vrft_loss(data: iddata, phi: np.ndarray, theta: np.ndarray) -> float
     z = np.dot(phi, theta.T).flatten()
     return np.linalg.norm(data.u[:z.size] - z) ** 2 / z.size
 
-def calc_minimum(data: iddata, phi1: np.ndarray,
+def calc_minimum(u: np.ndarray, phi1: np.ndarray,
                  phi2: np.ndarray = None) -> np.ndarray:
     """Compute least squares minimum
     Parameters
     ----------
-    data : iddata
-        iddata object containing data from experiments
+    u : np.ndarray
+        input data from experiments
     phi1 : np.ndarray
         Regressor
     phi2 : np.ndarray, optional
@@ -146,15 +146,15 @@ def calc_minimum(data: iddata, phi1: np.ndarray,
     phi1 = np.array(phi1)
     L = phi1.shape[0]
     if phi2 is None:
-        theta, _, _, _ = sp.linalg.lstsq(phi1, data.u[:L], lapack_driver='gelsy')
+        theta, _, _, _ = sp.linalg.lstsq(phi1, u[:L], lapack_driver='gelsy')
     else:
         phi2 = np.array(phi2)
-        theta = (np.linalg.inv(phi2.T @ phi1) @ phi2.T).dot(data.u[:L])
+        theta = (np.linalg.inv(phi2.T @ phi1) @ phi2.T).dot(u[:L])
     return theta.flatten()
 
-def control_response(data: iddata, error: np.ndarray, control: list) -> np.ndarray:
+def control_response(error: np.ndarray, control: list) -> np.ndarray:
     """ Compute control response given the error signal """
-    t_step = data.ts
+    t_step = control[0].dt
     t = [i * t_step for i in range(len(error))]
 
     phi = [None] * len(control)
@@ -185,6 +185,7 @@ def compute_vrft(data: iddata,
                  prefilter: scipysig.dlti = None,
                  iv: bool =  False,
                  sensitivity_model: scipysig.dlti = None,
+                 sensitivity_control: list = None,
                  sensitivity_prefilter: scipysig.dlti = None):
     """Compute VRFT Controller
     Parameters
@@ -205,10 +206,12 @@ def compute_vrft(data: iddata,
         Specifies the sensitivity transfer function S(z), used in 2 DOF
         controllers. Check "Virtual reference feedback tuning for two degree
         of freedom controllers", Lecchini et al., 2002, for more information.
+    sensitivity_control : list, option
+        list of discrete transfer functions, representing the control basis. Used
+        in 2 DOG controllers.
     sensitivity_prefilter : scipy.signal.dlti, optional
         Specifies the sensitivity prefilter transfer function S(z), used in 2 DOF
-        controllers. Check "Virtual reference feedback tuning for two degree
-        of freedom controllers", Lecchini et al., 2002, for more information.
+        controllers.
 
     Returns
     -------
@@ -221,6 +224,18 @@ def compute_vrft(data: iddata,
     final_control: scipy.signal.dlti
         Final controller
     """
+
+
+    #### CHECKS ####
+
+    # Validate control
+    if not isinstance(control, list):
+        raise ValueError('control should be a list of discrete transfer functions')
+    else:
+        for c in control:
+            if not isinstance(c, scipysig.dlti):
+                raise ValueError('control should be a list of discrete transfer functions')
+
 
     # Check the data
     if not isinstance(data, iddata):
@@ -246,6 +261,14 @@ def compute_vrft(data: iddata,
     if not isinstance(sensitivity_model, scipysig.dlti) and sensitivity_model is not None:
         raise ValueError('sensitivity_model is neither None or a discrete transfer function')
     elif sensitivity_model is not None:
+        if not isinstance(sensitivity_control, list):
+            raise ValueError('sensitivity_control should be a list of discrete transfer functions')
+        else:
+            for c in sensitivity_control:
+                if not isinstance(c, scipysig.dlti):
+                    raise ValueError('sensitivity_control should be a list of discrete transfer functions')
+
+
         s_model = ExtendedTF(sensitivity_model.num, sensitivity_model.den, sensitivity_model.dt) - 1
         sensitivity_data = data.copy() if isinstance(data, iddata) else [d.copy() for d in data]
 
@@ -259,10 +282,14 @@ def compute_vrft(data: iddata,
                 sensitivity_data = compute_sensitivity_data(sensitivity_data, S)
 
 
+
+    #### VRFT ####
     if not iv:
         # No instrumental variable routine
         if isinstance(data, list):
             data = data[0]
+            if sensitivity_model:
+                sensitivity_data = sensitivity_data[0]
         data.check()
 
         # Compute virtual reference
@@ -272,12 +299,28 @@ def compute_vrft(data: iddata,
         if sensitivity_model:
             d, nd = virtual_reference(sensitivity_data, s_model.num, s_model.den)
             ybar = data.y[:nd] + d
+            phi_r = control_response(r, control)
+            phi_ym = control_response(data.y[:n], sensitivity_control)
+            phi_ys = control_response(ybar, sensitivity_control)
 
-        # Compute control response given the virtual reference
-        phi = control_response(data, np.subtract(r, data.y[:n]), control)
+            phi1 = np.hstack([phi_r, -phi_ym])
+            phi2 = np.hstack([np.zeros_like(phi_ys), phi_ys])
 
-        # Compute MSE minimizer
-        theta = calc_minimum(data, phi)
+            phi = np.linalg.inv(phi1.T @ phi1 + phi2.T @ phi2)
+            theta = phi @ (phi1.T.dot(data.u[:n]) - phi2.T.dot(sensitivity_data.u[:n]))
+
+            # Final controller
+            nk = len(control)
+            c1 = np.dot(theta[:nk], control)
+            c2 = np.dot(theta[nk:], sensitivity_control)
+            return theta, c1, c2
+
+        else:
+            # Compute control response given the virtual reference
+            phi = control_response(np.subtract(r, data.y[:n]), control)
+
+            # Compute MSE minimizer
+            theta = calc_minimum(data.u, phi)
     else:
         # Instrumental variable routine
 
@@ -288,6 +331,10 @@ def compute_vrft(data: iddata,
             # check if the two datasets have same size
             if d1.y.size != d2.y.size:
                 raise ValueError('The two datasets should have same size!')
+
+            if sensitivity_model:
+                s1 = sensitivity_data[0]
+                s2 = sensitivity_data[1]
         else:
             raise ValueError('To use IV the data should be a list of iddata objects')
 
@@ -295,17 +342,47 @@ def compute_vrft(data: iddata,
         r1, n1 = virtual_reference(d1, reference_model.num, reference_model.den)
         r2, n2 = virtual_reference(d2, reference_model.num, reference_model.den)
 
-        # Compute control response
-        phi1 = control_response(d1, np.subtract(r1, d1.y[:n1]), control)
-        phi2 = control_response(d2, np.subtract(r2, d2.y[:n2]), control)
+        # Compute virtual disturbance (for 2DOF)
+        if sensitivity_model:
 
-        # We use the first dataset to compute statistics (e.g. VRFT Loss)
-        phi = phi1
-        data = data[0]
-        r = r1
+            _d1, nd = virtual_reference(s1, s_model.num, s_model.den)
+            _d2, nd = virtual_reference(s2, s_model.num, s_model.den)
 
-        # Compute MSE minimizer
-        theta = calc_minimum(data, phi1, phi2)
+            ybar1 = d1.y[:nd] + _d1
+            ybar2 = d2.y[:nd] + _d2
+            phi_r1 = control_response(r1, control)
+            phi_r2 = control_response(r2, control)
+            phi_ym1 = control_response(d1.y[:nd], sensitivity_control)
+            phi_ym2 = control_response(d2.y[:nd], sensitivity_control)
+            phi_ys1 = control_response(ybar1, sensitivity_control)
+            phi_ys2 = control_response(ybar2, sensitivity_control)
+
+            phi1 = np.hstack([phi_r2, -phi_ym2]).T @ np.hstack([phi_r1, -phi_ym1])
+            phi2 = np.hstack([np.zeros_like(phi_ys2), phi_ys2]).T @ np.hstack([np.zeros_like(phi_ys1), phi_ys1])
+
+            phi = np.linalg.inv(phi1 + phi2)
+            phi1 = np.hstack([phi_r2, -phi_ym2])
+            phi2 = np.hstack([np.zeros_like(phi_ys2), phi_ys2])
+            theta = phi @ (phi1.T.dot(d1.u[:nd]) - phi2.T.dot(s1.u[:nd]))
+
+            # Final controller
+            nk = len(control)
+            c1 = np.dot(theta[:nk], control)
+            c2 = np.dot(theta[nk:], sensitivity_control)
+            return theta, c1, c2
+        else:
+
+            # Compute control response
+            phi1 = control_response(np.subtract(r1, d1.y[:n1]), control)
+            phi2 = control_response(np.subtract(r2, d2.y[:n2]), control)
+
+            # We use the first dataset to compute statistics (e.g. VRFT Loss)
+            phi = phi1
+            data = data[0]
+            r = r1
+
+            # Compute MSE minimizer
+            theta = calc_minimum(data.u, phi1, phi2)
 
     # Compute VRFT loss
     loss = compute_vrft_loss(data, phi, theta)
