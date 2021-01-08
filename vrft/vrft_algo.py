@@ -22,6 +22,7 @@ from vrft.utils import systemOrder, checkSystem, \
     filter_signal
 import numpy as np
 import scipy.signal as scipysig
+import scipy as sp
 
 def virtualReference(data: iddata, num: np.ndarray, den: np.ndarray) -> np.ndarray:
     try:
@@ -87,6 +88,8 @@ def virtualReference(data: iddata, num: np.ndarray, den: np.ndarray) -> np.ndarr
 
 def compute_vrft_loss(data: iddata, phi: np.ndarray, theta: np.ndarray):
     z = np.dot(phi, theta.T).flatten()
+    # import pdb
+    # pdb.set_trace()
     L = z.size
     return np.linalg.norm(data.u[:L] - z)**2 / L
 
@@ -107,15 +110,14 @@ def calc_minimum(data: iddata, phi1: np.ndarray,
     theta : np.ndarray
         Coefficients computed for the control basis
     """
-    phi1 = np.mat(phi1)
-    phi2 = np.mat(phi2) if phi2 is not None else phi1
-    nk = phi1.shape[1]
-    #least squares
-    theta = np.linalg.inv(phi1.T @ phi2) @ phi1.T
-
-    L = theta.shape[1]
-    theta = np.array(np.dot(theta, data.u[:L])).flatten()
-    return theta
+    phi1 = np.array(phi1)
+    L = phi1.shape[0]
+    if phi2 is None:
+        theta, _, _, _ = sp.linalg.lstsq(phi1, data.u[:L], lapack_driver='gelsy')
+    else:
+        phi2 = np.array(phi2)
+        theta = (np.linalg.inv(phi2.T @ phi1) @ phi2.T).dot(data.u[:L])
+    return theta.flatten()
 
 def control_response(data: iddata, error: np.ndarray, control: list):
     t_step = data.ts
@@ -136,14 +138,8 @@ def compute_vrft(data: iddata, refModel: scipysig.dlti,
     Parameters
     ----------
     data : iddata or list of iddata objects
-        Data used to identify theta.
-        - If data is an iddata object and iv is set to True,
-          then the data will be split into half in order
-          to compute the instrumental variable.
-
-        - If data a list of iddata objects and iv is False, then
-           only the first element will be used to identify theta. 
-           If iv is True the first two elements will be used.
+        Data used to identify theta. If iv is set to true,
+        then the algorithm expects a list of 2 iddata objects
     refModel : scipy.signal.dlti
         Discrete Transfer Function representing the reference model
     control : list
@@ -151,9 +147,8 @@ def compute_vrft(data: iddata, refModel: scipysig.dlti,
     prefilter : scipy.signal.dlti, optional
         Filter used to pre-filter the data
     iv : bool, optiona;
-        Instrumental variable option. If true, the dataset will be split in two, and
-        the instrumental variable will be constructed based on the second half of the
-        dataset 
+        Instrumental variable option. If true, the instrumental variable will 
+        be constructed based on two iddata objets
 
     Returns
     -------
@@ -170,6 +165,9 @@ def compute_vrft(data: iddata, refModel: scipysig.dlti,
         if not isinstance(data, list):
             raise ValueError('data should be an iddata object or a list of iddata objects')
         else:
+            if iv and len(data) != 2:
+                raise ValueError('data should be a list of 2 iddata objects')
+
             for d in data:
                 if not isinstance(d, iddata):
                     raise ValueError('data should be a list of iddata objects')
@@ -207,15 +205,25 @@ def compute_vrft(data: iddata, refModel: scipysig.dlti,
             if d1.y.size != d2.y.size:
                 raise ValueError('The two datasets should have same size!')
         else:
-            d1, d2 = data.split()
+            raise ValueError('To use IV the data should be a list of iddata objects')
+
         r1, n1 = virtualReference(d1, refModel.num, refModel.den)
         r2, n2 = virtualReference(d2, refModel.num, refModel.den)
         phi1 = control_response(d1, np.subtract(r1, d1.y[:n1]), control)
         phi2 = control_response(d2, np.subtract(r2, d2.y[:n2]), control)
-        theta = calc_minimum(data, phi1, phi2)
+        
 
-        phi = np.concatenate([phi1, phi2])
-        r = np.concatenate([r1, r2])
+        # import pdb
+        # pdb.set_trace()
+        if isinstance(data, list):
+            phi = phi1
+            data = data[0]
+            r = r1
+        else:
+            phi = np.concatenate([phi1, phi2])
+            r = np.concatenate([r1, r2])
+
+        theta = calc_minimum(data, phi1, phi2)
 
     # Compute VRFT loss
     loss = compute_vrft_loss(data, phi, theta)

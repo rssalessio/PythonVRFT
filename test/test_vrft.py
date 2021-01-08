@@ -76,9 +76,14 @@ class TestVRFT(TestCase):
             num = [0.1]
             den = [1, -0.9]
             sys = scipysig.TransferFunction(num, den, dt=t_step)
-            t, y = scipysig.dlsim(sys, u, t)
+            _, y = scipysig.dlsim(sys, u, t)
             y = y.flatten() + 1e-2 * np.random.normal(size=t.size)
-            data = iddata(y,u,t_step,[0])
+            data1 = iddata(y,u,t_step,[0])
+
+            _, y = scipysig.dlsim(sys, u, t)
+            y = y.flatten() + 1e-2 * np.random.normal(size=t.size)
+            data2 = iddata(y,u,t_step,[0])
+            
 
             refModel = ExtendedTF([0.2], [1, -0.8], dt=t_step)
             prefilter = refModel * (1-refModel)
@@ -88,5 +93,7 @@ class TestVRFT(TestCase):
                     ExtendedTF([1], [1,0,0,0], dt=t_step),
                     ExtendedTF([1, 0], [1,1], dt=t_step)]
 
-            theta, _, loss, _ = compute_vrft(data, refModel, control, prefilter, iv=True)
+            with self.assertRaises(ValueError):
+                compute_vrft(data1, refModel, control, prefilter, iv=True)
 
+            compute_vrft([data1, data2], refModel, control, prefilter, iv=True)

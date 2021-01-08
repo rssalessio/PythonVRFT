@@ -19,15 +19,12 @@ import matplotlib.pyplot as plt
 import scipy.signal as scipysig
 from vrft import *
 
-def generateNoise(t):
-    omega = 2*np.pi*100
-    xi = 0.9
-    dt = t[1] - t[0]
-    noise =  np.random.normal(0,0.1,t.size)
-    tf = scipysig.TransferFunction([10*omega**2], [1, 2*xi*omega, omega**2])
-    # Second order system
-    _, yn, _ = scipysig.lsim(tf, noise, t)
-    return yn
+# Example 1
+# ------------
+# In this example we see how to apply VRFT to a simple SISO model
+# without any measurement noise.
+# Input data is generated using a square signal
+#
 
 #Generate time and u(t) signals
 t_start = 0
@@ -43,8 +40,7 @@ num = [0.5]
 den = [1, -0.9]
 sys = ExtendedTF(num, den, dt=t_step)
 t, y = scipysig.dlsim(sys, u, t)
-y = y[:, 0]
-#y += generateNoise(t)
+y = y.flatten()
 data = iddata(y, u, t_step, [0])
 
 
@@ -78,7 +74,7 @@ _, ys = scipysig.dlsim(sys, u, t)
 yr = np.array(yr).flatten()
 ys = np.array(ys).flatten()
 yc = np.array(yc).flatten()
-fig, ax = plt.subplots(4, sharex=True)
+fig, ax = plt.subplots(4, sharex=True, figsize=(12,8), dpi= 100, facecolor='w', edgecolor='k')
 ax[0].plot(t, yr,label='Ref System')
 ax[0].plot(t, yc, label='CL System')
 ax[0].set_title('Systems response')
