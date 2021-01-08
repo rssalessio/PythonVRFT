@@ -1,7 +1,7 @@
 # test_reference.py - Unittest for virtual reference algorithm
 #
 # Code author: [Alessio Russo - alessior@kth.se]
-# Last update: 07th January 2020, by alessior@kth.se
+# Last update: 07th January 2021, by alessior@kth.se
 #
 # This file is part of PythonVRFT.
 # PythonVRFT is free software: you can redistribute it and/or modify

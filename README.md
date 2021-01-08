@@ -4,6 +4,7 @@ VRFT Adaptive Control Library written in Python. Aim of this library is to provi
 You can find the package also at the following [link](https://pypi.org/project/pythonvrft/)
 
 _Author_: Alessio Russo (PhD Student at KTH - alessior@kth.se)
+
 _Collaborators_: ...
 
 
@@ -71,9 +72,9 @@ python -m unittest
 
 ## Changelog
 - [**V. 0.0.2**][26.03.2017] Implement the basic VRFT algorithm (1 DOF. offline, linear controller, controller expressed as scalar product theta*f(z))
-- [**V. 0.0.3**][05.01.2020] Code refactoring and conversion to Python 3; Removed support for Python Control library.
-- [**V. 0.0.5**][08.01.2020] Add Instrumental Variables (IVs) Support
-- [**In Progress**][07.01.2020-] Add Documentation and Latex formulas
+- [**V. 0.0.3**][05.01.2021] Code refactoring and conversion to Python 3; Removed support for Python Control library.
+- [**V. 0.0.5**][08.01.2021] Add Instrumental Variables (IVs) Support
+- [**In Progress**][07.01.2021-] Add Documentation and Latex formulas
 - [**TODO**] Add MIMO Support
 - [**TODO**] Generalize to other kind of controllers (e.g., neural nets)
 - [**TODO**] Add Cython support
@@ -83,7 +84,7 @@ If you find this code useful in your research, please, consider citing it:
 >@misc{pythonvrft,
 >  author       = {Alessio Russo},
 >  title        = {Python VRFT Library},
->  year         = 2020,
+>  year         = 2017,
 >  doi          = {},
 >  url          = { https://github.com/rssalessio/PythonVRFT }
 >}
