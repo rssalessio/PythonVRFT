@@ -39,7 +39,7 @@ from vrft import compute_vrft  # VRFT algorithm
 dt = 0.1  # sampling time
 
 # Define a reference model
-ref_model = ExtendedTF([0.6], [1, -0.4], dt=dt)   # Transfer function 0.6/ (z-0.4)
+ref_model = ExtendedTF([0.6], [1, -0.4], dt=dt)   # Transfer function 0.6/(z-0.4)
 
 # Define pre-filter
 pre_filter = (1 - ref_model) * ref_model
