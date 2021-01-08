@@ -30,8 +30,8 @@ Check example3 to see usage of instrumental variables.
 In general the code has the following structure
 ```python
 from vrft import ExtendedTF    # Discrete transfer function (inherits from the scipy.signal.dlti class)
-							   # Allows to sum/multiply/divide transfer functions and compute the feedback
-							   # loop
+                               # Allows to sum/multiply/divide transfer functions and compute the feedback
+                               # loop
 from vrft import iddata        # object used to store input/output data
 from vrft import compute_vrft  # VRFT algorithm
 
