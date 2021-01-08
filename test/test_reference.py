@@ -1,4 +1,8 @@
-# Copyright [2017-2020] [Alessio Russo - alessior@kth.se]  
+# test_reference.py - Unittest for virtual reference algorithm
+#
+# Code author: [Alessio Russo - alessior@kth.se]
+# Last update: 07th January 2020, by alessior@kth.se
+#
 # This file is part of PythonVRFT.
 # PythonVRFT is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -9,9 +13,6 @@
 # GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License
 # along with PythonVRFT.  If not, see <http://www.gnu.org/licenses/>.
-#
-# Code author: [Alessio Russo - alessior@kth.se]
-# Last update: 06th January 2020, by alessior@kth.se
 #
 
 from unittest import TestCase
@@ -51,15 +52,11 @@ class TestReference(TestCase):
         t,y = scipysig.dlsim(sys, u, t)
         y = y[:,0]
         data = iddata(y,u,t_step,[0,0])
-        #wrong initial conditions
+        
+        # wrong initial conditions
         with self.assertRaises(ValueError):
-            virtualReference(data, num, den)
-
-        #wrong initial conditions
-        data = iddata(y,u,t_step,[0,0,0])
-        with self.assertRaises(ValueError):
-            virtualReference(data, num, den)
-
+            r, _ = virtualReference(data, num, den)
+    
         #test good data, first order
         data = iddata(y,u,t_step,[0])
 
@@ -79,3 +76,4 @@ class TestReference(TestCase):
         r, _ = virtualReference(data, num, den)
         for i in range(len(r)):
             self.assertTrue(np.isclose(r[i], u[i]))
+ 
