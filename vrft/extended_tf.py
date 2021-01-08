@@ -21,6 +21,7 @@
 
 from __future__ import division
 
+from typing import overload
 import numpy as np
 import scipy.signal as scipysig
 from scipy.signal.ltisys import TransferFunction as TransFun

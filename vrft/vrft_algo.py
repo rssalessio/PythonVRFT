@@ -1,7 +1,7 @@
 # vrft_algo.py - VRFT algorithm implementation
 #
 # Code author: [Alessio Russo - alessior@kth.se]
-# Last update: 07th January 2021, by alessior@kth.se
+# Last update: 08th January 2021, by alessior@kth.se
 #
 # Copyright(c) [2017-2021] [Alessio Russo - alessior@kth.se]  
 # This file is part of PythonVRFT.
@@ -24,6 +24,7 @@ import scipy.signal as scipysig
 from vrft.iddata import iddata
 from vrft.utils import system_order, check_system, \
     filter_signal
+from vrft.extended_tf import ExtendedTF
 
 
 @overload 
@@ -152,6 +153,7 @@ def calc_minimum(data: iddata, phi1: np.ndarray,
     return theta.flatten()
 
 def control_response(data: iddata, error: np.ndarray, control: list) -> np.ndarray:
+    """ Compute control response given the error signal """
     t_step = data.ts
     t = [i * t_step for i in range(len(error))]
 
@@ -163,16 +165,34 @@ def control_response(data: iddata, error: np.ndarray, control: list) -> np.ndarr
     phi = np.vstack(phi).T
     return phi
 
-def compute_vrft(data: iddata, refModel: scipysig.dlti,
-                 control: list, prefilter: scipysig.dlti = None,
-                 iv: bool =  False):
+def compute_sensitivity_data(data: iddata, sensitivity_model: scipysig.dlti) -> iddata:
+    new_data = data.copy()
+    m, n = system_order(sensitivity_model.num, sensitivity_model.den)
+    lag = n - m
+
+    if len(data.y0) > lag:
+        new_data.y0 = new_data.y0[-lag:]
+    elif len(data.y0) < lag:
+        k = lag - len(data.y0)
+        new_data.y0 += list(new_data.y[:k])
+        new_data.y = new_data.y[k:]
+        new_data.u = new_data.u[k:]
+    return new_data
+
+def compute_vrft(data: iddata,
+                 reference_model: scipysig.dlti,
+                 control: list,
+                 prefilter: scipysig.dlti = None,
+                 iv: bool =  False,
+                 sensitivity_model: scipysig.dlti = None,
+                 sensitivity_prefilter: scipysig.dlti = None):
     """Compute VRFT Controller
     Parameters
     ----------
     data : iddata or list of iddata objects
         Data used to identify theta. If iv is set to true,
         then the algorithm expects a list of 2 iddata objects
-    refModel : scipy.signal.dlti
+    reference_model : scipy.signal.dlti
         Discrete Transfer Function representing the reference model
     control : list
         list of discrete transfer functions, representing the control basis
@@ -181,6 +201,14 @@ def compute_vrft(data: iddata, refModel: scipysig.dlti,
     iv : bool, optiona;
         Instrumental variable option. If true, the instrumental variable will 
         be constructed based on two iddata objets
+    sensitivity_model : scipy.signal.dlti, optional
+        Specifies the sensitivity transfer function S(z), used in 2 DOF
+        controllers. Check "Virtual reference feedback tuning for two degree
+        of freedom controllers", Lecchini et al., 2002, for more information.
+    sensitivity_prefilter : scipy.signal.dlti, optional
+        Specifies the sensitivity prefilter transfer function S(z), used in 2 DOF
+        controllers. Check "Virtual reference feedback tuning for two degree
+        of freedom controllers", Lecchini et al., 2002, for more information.
 
     Returns
     -------
@@ -214,6 +242,22 @@ def compute_vrft(data: iddata, refModel: scipysig.dlti,
         else:
             data = data.copy().filter(prefilter)
 
+    # Check if the sensitivity model is provided
+    if not isinstance(sensitivity_model, scipysig.dlti) and sensitivity_model is not None:
+        raise ValueError('sensitivity_model is neither None or a discrete transfer function')
+    elif sensitivity_model is not None:
+        s_model = ExtendedTF(sensitivity_model.num, sensitivity_model.den, sensitivity_model.dt) - 1
+        sensitivity_data = data.copy() if isinstance(data, iddata) else [d.copy() for d in data]
+
+        # Prefilter the data
+        if sensitivity_prefilter is not None and isinstance(sensitivity_prefilter, scipysig.dlti):
+            if isinstance(sensitivity_data, list):
+                for i, d in enumerate(sensitivity_data):
+                    sensitivity_data[i] = d.copy().filter(sensitivity_prefilter)
+            else:
+                sensitivity_data = sensitivity_data.copy().filter(sensitivity_prefilter)
+                sensitivity_data = compute_sensitivity_data(sensitivity_data, S)
+
 
     if not iv:
         # No instrumental variable routine
@@ -222,7 +266,12 @@ def compute_vrft(data: iddata, refModel: scipysig.dlti,
         data.check()
 
         # Compute virtual reference
-        r, n = virtual_reference(data, refModel.num, refModel.den)
+        r, n = virtual_reference(data, reference_model.num, reference_model.den)
+
+        # Compute virtual disturbance (for 2DOF)
+        if sensitivity_model:
+            d, nd = virtual_reference(sensitivity_data, s_model.num, s_model.den)
+            ybar = data.y[:nd] + d
 
         # Compute control response given the virtual reference
         phi = control_response(data, np.subtract(r, data.y[:n]), control)
@@ -243,8 +292,8 @@ def compute_vrft(data: iddata, refModel: scipysig.dlti,
             raise ValueError('To use IV the data should be a list of iddata objects')
 
         # Compute virtual reference
-        r1, n1 = virtual_reference(d1, refModel.num, refModel.den)
-        r2, n2 = virtual_reference(d2, refModel.num, refModel.den)
+        r1, n1 = virtual_reference(d1, reference_model.num, reference_model.den)
+        r2, n2 = virtual_reference(d2, reference_model.num, reference_model.den)
 
         # Compute control response
         phi1 = control_response(d1, np.subtract(r1, d1.y[:n1]), control)
@@ -265,3 +314,6 @@ def compute_vrft(data: iddata, refModel: scipysig.dlti,
     final_control = np.dot(theta, control)
 
     return theta, r, loss, final_control
+
+
+
