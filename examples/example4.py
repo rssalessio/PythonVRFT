@@ -15,15 +15,23 @@
 #
 
 import numpy as np
-import math as m
 import matplotlib.pyplot as plt
 import scipy.signal as scipysig
 from vrft import *
 
 # Example 4
 # ------------
-# In this example we see how to apply VRFT to a simple SISO model
-# with measurement noise using instrumental variables
+# In this example we see how to apply VRFT to a 
+# more complex SISO model, specifically, the three-pulley 
+# system analyzed in the original VRFT paper:
+# 
+# "Virtual reference feedback tuning: 
+#      a direct method for the design offeedback controllers"
+# -- Campi et al. 2003
+# 
+# As in Example 3, we consider the case of  measurement 
+# noise using instrumental variables. Input data is generated 
+# using random normal noise
 
 dt = 0.05
 t_start = 0
@@ -53,7 +61,7 @@ data = [data1, data2]
 #       with alpha = e^{-dt omega}, omega = 10
 #
 omega = 10
-alpha = m.exp(-dt*omega)
+alpha = np.exp(-dt*omega)
 num_M = [(1-alpha)**2] 
 den_M = [1, -2*alpha, alpha**2, 0]
 refModel = ExtendedTF(num_M, den_M, dt=dt)
