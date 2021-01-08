@@ -3,7 +3,8 @@ VRFT Adaptive Control Library written in Python. Aim of this library is to provi
 
 You can find the package also at the following [link](https://pypi.org/project/pythonvrft/)
 
-_Author_: Alessio Russo (PhD Student at KTH - alesssior@kth.se)
+_Author_: Alessio Russo (PhD Student at KTH - alessior@kth.se)
+_Collaborators_: ...
 
 
 ![alt tag](https://github.com/rssalessio/PythonVRFT/blob/master/examples/example2.png)
