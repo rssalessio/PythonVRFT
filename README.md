@@ -77,8 +77,10 @@ python -m unittest
 - [**In Progress**][07.01.2021-] Add Documentation and Latex formulas
 - [**In Progress**] Add 2 Degrees of Freedom support
 - [**TODO**] Add MIMO Support
+- [**TODO**] Add Non-linear systems support
 - [**TODO**] Generalize to other kind of controllers (e.g., neural nets)
 - [**TODO**] Add Cython support
+- [**TODO**] Add constraints support
 
 ## Citations
 If you find this code useful in your research, please, consider citing it:
