@@ -246,13 +246,6 @@ def compute_vrft(data: iddata,
                 if not isinstance(d, iddata):
                     raise ValueError('data should be a list of iddata objects')
 
-    # Prefilter the data
-    if prefilter is not None and isinstance(prefilter, scipysig.dlti):
-        if isinstance(data, list):
-            for i, d in enumerate(data):
-                data[i] = d.copy().filter(prefilter)
-        else:
-            data = data.copy().filter(prefilter)
 
     # Check if the sensitivity model is provided
     if not isinstance(sensitivity_model, scipysig.dlti) and sensitivity_model is not None:
@@ -274,9 +267,20 @@ def compute_vrft(data: iddata,
             if isinstance(sensitivity_data, list):
                 for i, d in enumerate(sensitivity_data):
                     sensitivity_data[i] = d.copy().filter(sensitivity_prefilter)
+                    sensitivity_data[i] = compute_sensitivity_data(sensitivity_data[i], s_model)
             else:
                 sensitivity_data = sensitivity_data.copy().filter(sensitivity_prefilter)
-                sensitivity_data = compute_sensitivity_data(sensitivity_data, S)
+                sensitivity_data = compute_sensitivity_data(sensitivity_data, s_model)
+
+    # Prefilter the data
+    # @Note: this should be done after we filtered the sensitivity data,
+    # since the sensitivity data is built open the data from experiments
+    if prefilter is not None and isinstance(prefilter, scipysig.dlti):
+        if isinstance(data, list):
+            for i, d in enumerate(data):
+                data[i] = d.copy().filter(prefilter)
+        else:
+            data = data.copy().filter(prefilter)
 
 
 

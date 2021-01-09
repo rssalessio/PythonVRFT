@@ -31,15 +31,13 @@ from vrft import *
 # noise using instrumental variables. Input data is generated 
 # using random normal noise
 
-dt = 0.01
+dt = 0.5
 t_start = 0
-t_end = 10
+t_end = 100
 t = np.array([i * dt for i in range(int(t_end/dt))])
 
 # Plant P(z) 
-num_P = [0.1622, -0.01622]
-den_P = [1, -1.7, 0.8825]
-sys = ExtendedTF(num_P, den_P, dt=dt)
+sys = ExtendedTF([0.1622, -0.01622], [1, -1.7, 0.8825], dt=dt)
 
 def generate_noise(t):
     sigma = 0.1
@@ -59,17 +57,17 @@ data2 = generate_data(sys, u, t)
 data = [data1, data2]
 
 # Reference Model
-#            z^-1 (1-alpha)
+#             (1-alpha)
 # M(z) =  ---------------------
-#           (1 - alpha z^-1)
+#           (z - alpha )
 # 
 #       with alpha = 0.4
 #
 
 # Sensitivity Model
-#               z^-1 (1-beta)
+#                (1-beta)
 # S(z) = 1 -  ---------------------
-#              (1 - beta z^-1)
+#              (z - beta)
 # 
 #       with beta = 0.8
 #
@@ -79,6 +77,7 @@ beta = 0.8
 
 refModel = ExtendedTF([1 - alpha], [1, -alpha], dt=dt)
 sensModel = 1 - ExtendedTF([1 - beta], [1, -beta], dt=dt)
+W = ExtendedTF([1, 0], [1, -1], dt=dt)
 
 # Controller C(z,O) where O is $\theta$
 #
@@ -92,20 +91,26 @@ control = [ExtendedTF([1, 0], [1, -1], dt=dt),
            ExtendedTF([1], [1, -1, 0, 0], dt=dt),
            ExtendedTF([1], [1, -1, 0, 0, 0], dt=dt)]
 
-#Experiment filter
+# Experiment filter
 #
-# L(z) = M(z) ( 1 - M(z) )
+# Lm(z) = M(z) * S(z) * W(z)
+# Ls(z) = (S(z) - 1) * S(z) * W(z)
 #
-prefilter = refModel * (1 - refModel)
-sensitivity_filter = sensModel * (1 - sensModel)
+
+prefilter = ExtendedTF([1], [1], dt=dt) #refModel * (sensModel) # * W
+sensitivity_filter = ExtendedTF([1], [1], dt=dt) #(sensModel - 1) * sensModel # * W
+
+
+# VRFT method without Instrumental variables
+import pdb
+pdb.set_trace()
+theta_noiv, c1_noiv, c2_noiv = compute_vrft(data, refModel, control, prefilter,
+    iv=False, sensitivity_model=sensModel, sensitivity_control=control, sensitivity_prefilter=sensitivity_filter)
 
 # VRFT method with Instrumental variables
 theta_iv, c1_iv, c2_iv = compute_vrft(data, refModel, control, prefilter,
     iv=True, sensitivity_model=sensModel, sensitivity_control=control, sensitivity_prefilter=sensitivity_filter)
 
-# VRFT method without Instrumental variables
-theta_noiv, c1_noiv, c2_noiv = compute_vrft(data, refModel, control, prefilter,
-    iv=False, sensitivity_model=sensModel, sensitivity_control=control, sensitivity_prefilter=sensitivity_filter)
 
 # Obtained controller
 # print('------IV------')
@@ -114,9 +119,8 @@ theta_noiv, c1_noiv, c2_noiv = compute_vrft(data, refModel, control, prefilter,
 # print("Loss: {}\nTheta: {}\nController: {}".format(loss_noiv, theta_noiv, C_noiv))
 
 # Closed loop system
-closed_loop_iv = c1_iv  * (c2_iv * sys).feedback()
-closed_loop_noiv = c1_noiv * (c2_noiv * sys).feedback()
-
+closed_loop_iv = (c1_iv * sys) / (1 +  sys * c2_iv)
+closed_loop_noiv = (c1_noiv * sys) / (1 +  sys * c2_noiv)
 t = t[:-2]
 u = np.ones(len(t))
 

@@ -22,6 +22,7 @@
 import numpy as np
 import scipy.signal as scipysig
 from vrft.utils import filter_signal
+import copy
 
 
 class iddata(object):
@@ -58,14 +59,14 @@ class iddata(object):
         if ts is None:
             raise ValueError("Sampling time ts can't be None.")
 
-        self.y = np.array(y) if not isinstance(y, np.ndarray) else np.array([y]).flatten()
-        self.u = np.array(u) if not isinstance(u, np.ndarray) else np.array([u]).flatten()
+        self.y = np.array(y, copy=True) if not isinstance(y, np.ndarray) else np.array([y], copy=True).flatten()
+        self.u = np.array(u, copy=True) if not isinstance(u, np.ndarray) else np.array([u], copy=True).flatten()
         self.ts = float(ts)
 
         if y0 is None:
             raise ValueError("y0: {} can't be None.".format(y0))
         else:
-            self.y0 = np.array(y0) if not isinstance(y0, np.ndarray) else np.array([y0]).flatten()
+            self.y0 = np.array(y0, copy=True) if not isinstance(y0, np.ndarray) else np.array([y0], copy=True).flatten()
             if self.y0.size == 0 or self.y0.ndim == 0:
                 raise ValueError("y0 can't be None.")
 
