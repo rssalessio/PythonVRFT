@@ -125,13 +125,13 @@ def compute_vrft_loss(data: iddata, phi: np.ndarray, theta: np.ndarray) -> float
     z = np.dot(phi, theta.T).flatten()
     return np.linalg.norm(data.u[:z.size] - z) ** 2 / z.size
 
-def calc_minimum(data: iddata, phi1: np.ndarray,
+def calc_minimum(u: np.ndarray, phi1: np.ndarray,
                  phi2: np.ndarray = None) -> np.ndarray:
     """Compute least squares minimum
     Parameters
     ----------
-    data : iddata
-        iddata object containing data from experiments
+    u : np.ndarray
+        Input signal
     phi1 : np.ndarray
         Regressor
     phi2 : np.ndarray, optional
@@ -142,14 +142,8 @@ def calc_minimum(data: iddata, phi1: np.ndarray,
     theta : np.ndarray
         Coefficients computed for the control basis
     """
-    phi1 = np.array(phi1)
-    L = phi1.shape[0]
-    if phi2 is None:
-        theta, _, _, _ = sp.linalg.lstsq(phi1, data.u[:L], lapack_driver='gelsy')
-    else:
-        phi2 = np.array(phi2)
-        theta = (np.linalg.inv(phi2.T @ phi1) @ phi2.T).dot(data.u[:L])
-    return theta.flatten()
+    phi2 = phi1 if phi2 is None else phi2
+    return sp.linalg.solve(phi2.T @ phi1, phi2.T.dot(u))
 
 def control_response(data: iddata, error: np.ndarray, control: list) -> np.ndarray:
     t_step = data.ts
@@ -228,7 +222,7 @@ def compute_vrft(data: iddata, refModel: scipysig.dlti,
         phi = control_response(data, np.subtract(r, data.y[:n]), control)
 
         # Compute MSE minimizer
-        theta = calc_minimum(data, phi)
+        theta = calc_minimum(data.u[:n], phi)
     else:
         # Instrumental variable routine
 
@@ -256,7 +250,7 @@ def compute_vrft(data: iddata, refModel: scipysig.dlti,
         r = r1
 
         # Compute MSE minimizer
-        theta = calc_minimum(data, phi1, phi2)
+        theta = calc_minimum(data.u[:n1], phi1, phi2)
 
     # Compute VRFT loss
     loss = compute_vrft_loss(data, phi, theta)
