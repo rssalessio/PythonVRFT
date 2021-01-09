@@ -1,7 +1,7 @@
 # vrft_algo.py - VRFT algorithm implementation
 #
 # Code author: [Alessio Russo - alessior@kth.se]
-# Last update: 07th January 2021, by alessior@kth.se
+# Last update: 09th January 2021, by alessior@kth.se
 #
 # Copyright(c) [2017-2021] [Alessio Russo - alessior@kth.se]  
 # This file is part of PythonVRFT.

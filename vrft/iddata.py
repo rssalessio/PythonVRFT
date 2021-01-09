@@ -2,7 +2,7 @@
 # Analogous to the iddata object in Matlab sysid
 #
 # Code author: [Alessio Russo - alessior@kth.se]
-# Last update: 07th January 2021, by alessior@kth.se
+# Last update: 09th January 2021, by alessior@kth.se
 #
 # Copyright [2017-2021] [Alessio Russo - alessior@kth.se]  
 # This file is part of PythonVRFT.

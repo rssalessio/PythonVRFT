@@ -11,7 +11,7 @@
 # along with PythonVRFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Code author: [Alexander Berndt - alberndt@kth.se]
-# Last update: 08th January 2020, by alberndt@kth.se
+# Last update: 09th January 2020, by alessior@kth.se
 #
 
 import numpy as np
