@@ -23,4 +23,4 @@ __name__          = 'PythonVRFT'
 __version__       = '0.0.6'
 __author__        = 'Alessio Russo'
 __contributors__  = ['Alexander Berndt']
-__date__          = '08.01.2020'
+__date__          = '09.01.2020'

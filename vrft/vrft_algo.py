@@ -1,7 +1,7 @@
 # vrft_algo.py - VRFT algorithm implementation
 #
 # Code author: [Alessio Russo - alessior@kth.se]
-# Last update: 08th January 2021, by alessior@kth.se
+# Last update: 09th January 2021, by alessior@kth.se
 #
 # Copyright(c) [2017-2021] [Alessio Russo - alessior@kth.se]  
 # This file is part of PythonVRFT.
@@ -143,14 +143,9 @@ def calc_minimum(u: np.ndarray, phi1: np.ndarray,
     theta : np.ndarray
         Coefficients computed for the control basis
     """
-    phi1 = np.array(phi1)
-    L = phi1.shape[0]
-    if phi2 is None:
-        theta, _, _, _ = sp.linalg.lstsq(phi1, u[:L], lapack_driver='gelsy')
-    else:
-        phi2 = np.array(phi2)
-        theta = (np.linalg.inv(phi2.T @ phi1) @ phi2.T).dot(u[:L])
-    return theta.flatten()
+    phi2 = phi1 if phi2 is None else phi2
+    return sp.linalg.solve(phi2.T @ phi1, phi2.T.dot(u))
+
 
 def control_response(error: np.ndarray, control: list) -> np.ndarray:
     """ Compute control response given the error signal """
@@ -318,9 +313,9 @@ def compute_vrft(data: iddata,
         else:
             # Compute control response given the virtual reference
             phi = control_response(np.subtract(r, data.y[:n]), control)
-
             # Compute MSE minimizer
-            theta = calc_minimum(data.u, phi)
+            theta = calc_minimum(data.u[:n], phi)
+
     else:
         # Instrumental variable routine
 
@@ -382,7 +377,8 @@ def compute_vrft(data: iddata,
             r = r1
 
             # Compute MSE minimizer
-            theta = calc_minimum(data.u, phi1, phi2)
+            theta = calc_minimum(data.u[:n1], phi1, phi2)
+
 
     # Compute VRFT loss
     loss = compute_vrft_loss(data, phi, theta)

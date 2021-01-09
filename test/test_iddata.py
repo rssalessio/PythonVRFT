@@ -1,7 +1,7 @@
 # test_iddata.py - Unittest for the iddata object
 #
 # Code author: [Alessio Russo - alessior@kth.se]
-# Last update: 07th January 2021, by alessior@kth.se
+# Last update: 09th January 2021, by alessior@kth.se
 #
 # Copyright [2017-2021] [Alessio Russo - alessior@kth.se]  
 # This file is part of PythonVRFT.
@@ -20,6 +20,7 @@ import numpy as np
 import scipy.signal as scipysig
 from unittest import TestCase
 from vrft.iddata import iddata
+from vrft.extended_tf import ExtendedTF
 
 
 class TestIDData(TestCase):
@@ -96,6 +97,29 @@ class TestIDData(TestCase):
         a.filter(L)
         self.assertTrue(np.all(a.y == b.y))
         self.assertTrue(np.all(a.u == b.u))
+        self.assertTrue(np.all(a.y0 == b.y0))
+        self.assertTrue(a.ts == b.ts)
+
+        # Test more complex model
+        dt = 0.05
+        omega = 10
+        alpha = np.exp(-dt * omega)
+        num_M = [(1 - alpha) ** 2]
+        den_M = [1, -2 * alpha, alpha ** 2, 0]
+        refModel = ExtendedTF(num_M, den_M, dt=dt)
+
+        a = iddata(np.ones(10), np.ones(10), 0.1, [0])
+        L = refModel * (1 - refModel)
+        b = a.copy()
+        a.filter(L)
+
+        res = np.array([0, 0, 0, 0.15481812, 0.342622, 0.51348521,
+               0.62769493, 0.67430581, 0.66237955, 0.60937255])
+
+        self.assertTrue(np.allclose(a.y, res))
+        self.assertTrue(np.allclose(a.u, res))
+        self.assertTrue(np.all(a.u != b.u))
+        self.assertTrue(np.all(a.y != b.y))
         self.assertTrue(np.all(a.y0 == b.y0))
         self.assertTrue(a.ts == b.ts)
 
