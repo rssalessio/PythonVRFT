@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 # utils.py - VRFT utility functions
 #
 # Code author: [Alessio Russo - alessior@kth.se]

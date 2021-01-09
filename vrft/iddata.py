@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 # iddata.py - iddata object definition
 # Analogous to the iddata object in Matlab sysid
 #

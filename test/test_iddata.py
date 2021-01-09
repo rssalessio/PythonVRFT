@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 # test_iddata.py - Unittest for the iddata object
 #
 # Code author: [Alessio Russo - alessior@kth.se]

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 # vrft_algo.py - VRFT algorithm implementation
 #
 # Code author: [Alessio Russo - alessior@kth.se]

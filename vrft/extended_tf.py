@@ -1,12 +1,14 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 # extended_tf.py - Extended definition of the discrete
 # transfer function implemented in scipy.signal.
 # Supports arithmetical operations between transfer function
 # and feedback loop computation
 #
 # Code author: [Alessio Russo - alessior@kth.se]
-# Last update: 07th January 2020, by alessior@kth.se
+# Last update: 09th January 2021, by alessior@kth.se
 #
-# Copyright [2020] [Alessio Russo - alessior@kth.se]  
+# Copyright [2021] [Alessio Russo - alessior@kth.se]  
 # This file is part of PythonVRFT.
 # PythonVRFT is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
