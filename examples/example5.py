@@ -31,7 +31,7 @@ from vrft import *
 # noise using instrumental variables. Input data is generated 
 # using random normal noise
 
-dt = 0.5
+dt = 0.05
 t_start = 0
 t_end = 100
 t = np.array([i * dt for i in range(int(t_end/dt))])
@@ -97,13 +97,11 @@ control = [ExtendedTF([1, 0], [1, -1], dt=dt),
 # Ls(z) = (S(z) - 1) * S(z) * W(z)
 #
 
-prefilter = ExtendedTF([1], [1], dt=dt) #refModel * (sensModel) # * W
-sensitivity_filter = ExtendedTF([1], [1], dt=dt) #(sensModel - 1) * sensModel # * W
+prefilter = refModel * (sensModel) * W
+sensitivity_filter = (sensModel - 1) * sensModel * W
 
 
 # VRFT method without Instrumental variables
-import pdb
-pdb.set_trace()
 theta_noiv, c1_noiv, c2_noiv = compute_vrft(data, refModel, control, prefilter,
     iv=False, sensitivity_model=sensModel, sensitivity_control=control, sensitivity_prefilter=sensitivity_filter)
 
@@ -121,7 +119,11 @@ theta_iv, c1_iv, c2_iv = compute_vrft(data, refModel, control, prefilter,
 # Closed loop system
 closed_loop_iv = (c1_iv * sys) / (1 +  sys * c2_iv)
 closed_loop_noiv = (c1_noiv * sys) / (1 +  sys * c2_noiv)
-t = t[:-2]
+
+dt = 0.05
+t_start = 0
+t_end = 20
+t = np.array([i * dt for i in range(int(t_end/dt))])
 u = np.ones(len(t))
 
 _, yr = scipysig.dlsim(refModel, u, t)
@@ -140,10 +142,10 @@ ax[0].plot(t, yc_iv, label='CL System - IV')
 ax[0].plot(t, yc_noiv, label='CL System - No IV')
 ax[0].set_title('CL Systems response')
 ax[0].grid(True)
+ax[0].set_ylim([-0.1,2])
 ax[1].plot(t, ys, label='OL System')
 ax[1].set_title('OL Systems response')
 ax[1].grid(True)
-ax[2].plot(t, data1.y[:-2])
 ax[2].grid(True)
 ax[2].set_title('Experiment data')
 # ax[3].plot(t, r_iv)

@@ -251,6 +251,17 @@ def compute_vrft(data: iddata,
     if not isinstance(sensitivity_model, scipysig.dlti) and sensitivity_model is not None:
         raise ValueError('sensitivity_model is neither None or a discrete transfer function')
     elif sensitivity_model is not None:
+        s_model = ExtendedTF(sensitivity_model.num, sensitivity_model.den, sensitivity_model.dt) - 1
+        m, n = system_order(s_model.num, s_model.den)
+        lag = n - m
+
+        if isinstance(data, list):
+            sensitivity_data = [None] * len(data)
+            for i, d in enumerate(data):
+                sensitivity_data[i] = iddata(d.y, d.u, d.ts, [0.] * lag)
+        else:
+            sensitivity_data = iddata(data.y, data.u, data.ts, [0.] * lag)
+
         if not isinstance(sensitivity_control, list):
             raise ValueError('sensitivity_control should be a list of discrete transfer functions')
         else:
@@ -258,19 +269,13 @@ def compute_vrft(data: iddata,
                 if not isinstance(c, scipysig.dlti):
                     raise ValueError('sensitivity_control should be a list of discrete transfer functions')
 
-
-        s_model = ExtendedTF(sensitivity_model.num, sensitivity_model.den, sensitivity_model.dt) - 1
-        sensitivity_data = data.copy() if isinstance(data, iddata) else [d.copy() for d in data]
-
         # Prefilter the data
         if sensitivity_prefilter is not None and isinstance(sensitivity_prefilter, scipysig.dlti):
-            if isinstance(sensitivity_data, list):
-                for i, d in enumerate(sensitivity_data):
-                    sensitivity_data[i] = d.copy().filter(sensitivity_prefilter)
-                    sensitivity_data[i] = compute_sensitivity_data(sensitivity_data[i], s_model)
+            if isinstance(data, list):
+                for i, d in enumerate(data):
+                    sensitivity_data[i] = sensitivity_data[i].filter(sensitivity_prefilter)
             else:
-                sensitivity_data = sensitivity_data.copy().filter(sensitivity_prefilter)
-                sensitivity_data = compute_sensitivity_data(sensitivity_data, s_model)
+                sensitivity_data = sensitivity_data.filter(sensitivity_prefilter)
 
     # Prefilter the data
     # @Note: this should be done after we filtered the sensitivity data,
@@ -281,7 +286,6 @@ def compute_vrft(data: iddata,
                 data[i] = d.copy().filter(prefilter)
         else:
             data = data.copy().filter(prefilter)
-
 
 
     #### VRFT ####
@@ -298,17 +302,45 @@ def compute_vrft(data: iddata,
 
         # Compute virtual disturbance (for 2DOF)
         if sensitivity_model:
+            
             d, nd = virtual_reference(sensitivity_data, s_model.num, s_model.den)
-            ybar = data.y[:nd] + d
-            phi_r = control_response(r, control)
+            n = min(n, nd)
+            ybar = sensitivity_data.y[:n] + d[:n]
+            phi_r = control_response(r[:n], control)
             phi_ym = control_response(data.y[:n], sensitivity_control)
-            phi_ys = control_response(ybar, sensitivity_control)
+            phi_ys = control_response(ybar[:n], sensitivity_control)
+            #phi_d = control_response(d[:n], sensitivity_control)
 
             phi1 = np.hstack([phi_r, -phi_ym])
             phi2 = np.hstack([np.zeros_like(phi_ys), phi_ys])
 
-            phi = np.linalg.inv(phi1.T @ phi1 + phi2.T @ phi2)
-            theta = phi @ (phi1.T.dot(data.u[:n]) - phi2.T.dot(sensitivity_data.u[:n]))
+            #phi2 = np.hstack([0 * phi_r, -phi_ym])
+            # phi4 = np.hstack([np.zeros_like(phi_d), phi_d])
+
+            # print(np.linalg.norm(phi4 - (phi3 + phi2),np.infty))
+            # print(np.linalg.norm(phi4.T @ phi4 - (phi3 + phi2).T @ (phi3 + phi2),np.infty))
+
+            # phi = phi1 + phi2 + phi3
+            # y = (phi1+phi3).T.dot(data.u[:n]) - phi2.T.dot(sensitivity_data.u[:n])
+            # theta = sp.linalg.solve(phi.T @ phi, y)
+            # print(theta)
+            # import pdb
+            # pdb.set_trace()
+
+
+            #phi = np.linalg.inv((phi1 + phi2).T @ (phi1 + phi2))
+            #theta1 = sp.linalg.solve((phi1 + phi2).T @ (phi1 + phi2), (phi1.T.dot(data.u[:n]) - phi2.T.dot(sensitivity_data.u[:n])))
+            #theta2 = phi @ (phi1.T.dot(data.u[:n]) - phi2.T.dot(sensitivity_data.u[:n]))
+
+            # print(np.linalg.eig((phi1 + phi2).T @ (phi1 + phi2))[0])
+            # print(np.linalg.eig(phi1.T @ phi1 + phi2.T @ phi2)[0])
+
+            theta = sp.linalg.solve(phi1.T @ phi1 + phi2.T @ phi2, (phi1.T.dot(data.u[:n]) - phi2.T.dot(sensitivity_data.u[:n])))
+            # print(theta1)
+            # print(theta3)
+
+            # import pdb
+            # pdb.set_trace()
 
             # Final controller
             nk = len(control)
