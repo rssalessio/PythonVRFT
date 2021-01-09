@@ -5,7 +5,7 @@ You can find the package also at the following [link](https://pypi.org/project/p
 
 _Author_: Alessio Russo (PhD Student at KTH - alessior@kth.se)
 
-_Collaborators_: ...
+_Contributors_: Alexander Berndt
 
 
 ![alt tag](https://github.com/rssalessio/PythonVRFT/blob/master/examples/example2.png)
