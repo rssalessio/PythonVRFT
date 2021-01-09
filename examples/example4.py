@@ -46,7 +46,7 @@ sys = ExtendedTF(num_P, den_P, dt=dt)
 def generate_data(sys, u, t):
     t, y = scipysig.dlsim(sys, u, t)
     y = y.flatten() + 0.5 * np.random.normal(size = t.size)
-    return iddata(y, u, dt, [0])
+    return iddata(y, u, dt, [0, 0, 0])
 
 u = np.random.normal(size=t.size)
 data1 = generate_data(sys, u, t)

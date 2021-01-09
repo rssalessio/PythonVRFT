@@ -26,6 +26,10 @@ class iddata(object):
     """
      iddata is a class analogous to the iddata object in Matlab
      It is used to save input/output data.
+
+     @NOTE: y0, the initial conditions, are in general not used.
+            The only reason to specify y0 is in case the system is non linear.
+            In that case y0 needs to be specified (for the equilibria condition)
     """
 
     def __init__(self, y: np.ndarray,
@@ -86,7 +90,7 @@ class iddata(object):
 
     def filter(self, L: scipysig.dlti):
         """ Filters the data using the specified filter L(z) """
-        self.y = filter_signal(L, self.y, x0=self.y0)
+        self.y = filter_signal(L, self.y)
         self.u = filter_signal(L, self.u)
         return self
 
