@@ -1,5 +1,5 @@
-# PythonVRFT Library - Version 0.0.6
-VRFT Adaptive Control Library written in Python. Aim of this library is to provide an implementation of the VRFT (Virtual Reference Feedback Tuning) algorithm.
+# PythonVRFT Library - Virtual Reference Feedback Tuning - Version 0.0.6
+Virtual Reference Feedback Tuning (VRFT) Adaptive Control Library written in Python. Aim of this library is to provide an implementation of the VRFT (Virtual Reference Feedback Tuning) algorithm.
 
 You can find the package also at the following [link](https://pypi.org/project/pythonvrft/)
 
