@@ -15,21 +15,21 @@ setup(name = 'pythonvrft',
     url = 'https://github.com/rssalessio/PythonVRFT/',
     author = 'Alessio Russo',
     author_email = 'alessior@kth.se',
-    license='GPL3',
-    packages=['vrft', 'test'],
-    zip_safe=False,
+    license = 'GPL3',
+    packages = ['vrft', 'test'],
+    zip_safe = False,
     install_requires = [
         'scipy',
         'numpy',
     ],
     test_suite = 'nose.collector',
     test_requires = ['nose'],
-    classifiers=[
+    classifiers = [
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
         "Development Status :: 3 - Alpha",
         "Topic :: Scientific/Engineering"
     ],
-    python_requires='>=3.5',
+    python_requires = '>=3.5',
 )
