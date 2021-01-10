@@ -93,7 +93,7 @@ def virtual_reference(data: iddata, num: np.ndarray, den: np.ndarray) -> np.ndar
 
         for i in range(start_i, N + 1):
             index = k + i - N
-            if (index < 0):
+            if index < 0:
                 left_side += den[offset_N +
                                  abs(i - N)] * y0[abs(index) - 1]
             else:
@@ -107,7 +107,7 @@ def virtual_reference(data: iddata, num: np.ndarray, den: np.ndarray) -> np.ndar
             else:
                 r = num[offset_M]
 
-        if (np.isclose(r, 0.0) != True):
+        if not np.isclose(r, 0.0):
             reference[k - lag] = left_side / r
         else:
             reference[k - lag] = 0.0
