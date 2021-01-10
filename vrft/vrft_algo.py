@@ -85,57 +85,6 @@ def virtual_reference(data: iddata, num: np.ndarray, den: np.ndarray) -> np.ndar
 
     return r, len(r)
 
-    # y0 = data.y0
-
-    # if y0 is None:
-    #     y0 = [0.] * lag
-
-    # if y0 is not None and (lag != len(y0)):
-    #     raise ValueError("Wrong initial condition size.")
-
-    
-
-
-    # # return r, len(r)
-
-    # reference = np.zeros_like(data.y)
-    # L = len(data.y)
-
-    # for k in range(0, len(data.y) + lag):
-    #     left_side = 0
-    #     r = 0
-
-    #     start_i = 0 if k >= M else M - k
-    #     start_j = 0 if k >= N else N - k
-
-    #     for i in range(start_i, N + 1):
-    #         index = k + i - N
-    #         if (index < 0):
-    #             left_side += den[offset_N +
-    #                              abs(i - N)] * y0[abs(index) - 1]
-    #         else:
-    #             left_side += den[offset_N + abs(i - N)] * (
-    #                 data.y[index] if index < L else 0)
-
-    #     for j in range(start_j, M + 1):
-    #         index = k + j - N
-    #         if (start_j != M):
-    #             left_side += -num[offset_M + abs(j - M)] * reference[index]
-    #         else:
-    #             r = num[offset_M]
-
-    #     if (np.isclose(r, 0.0) != True):
-    #         reference[k - lag] = left_side / r
-    #     else:
-    #         reference[k - lag] = 0.0
-
-    # #add missing data..just copy last N-M points
-    # #for i in range(lag):
-    # #    reference[len(self.data.y)+i-lag] =0 #reference[len(self.data.y)+i-1-lag]
-
-    # return reference[:-lag], len(reference[:-lag])
-
-
 def compute_vrft_loss(data: iddata, phi: np.ndarray, theta: np.ndarray) -> float:
     z = np.dot(phi, theta.T).flatten()
     return np.linalg.norm(data.u[:z.size] - z) ** 2 / z.size
