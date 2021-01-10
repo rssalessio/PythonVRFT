@@ -1,17 +1,12 @@
-# Copyright [2021] [Alessio Russo - alessior@kth.se]  
+# Copyright (c) [2021] Alessio Russo [alessior@kth.se]. All rights reserved.
 # This file is part of PythonVRFT.
 # PythonVRFT is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, version 3 of the License.
-# PythonVRFT is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# You should have received a copy of the GNU General Public License
-# along with PythonVRFT.  If not, see <http://www.gnu.org/licenses/>.
+# it under the terms of the MIT License. You should have received a copy of
+# the MIT License along with PythonVRFT.
+# If not, see <https://opensource.org/licenses/MIT>.
 #
 # Code author: [Alessio Russo - alessior@kth.se]
-# Last update: 08th January 2021, by alessior@kth.se
+# Last update: 10th January 2021, by alessior@kth.se
 #
 
 import numpy as np
