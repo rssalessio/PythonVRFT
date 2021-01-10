@@ -20,6 +20,8 @@ import numpy as np
 import scipy.signal as scipysig
 from scipy.signal.ltisys import TransferFunction as TransFun
 from numpy import polymul, polyadd
+import logging as lg
+logger = lg.getLogger(__name__)
 
 
 class ExtendedTF(scipysig.ltisys.TransferFunctionDiscrete):

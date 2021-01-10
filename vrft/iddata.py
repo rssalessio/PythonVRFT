@@ -14,8 +14,10 @@
 
 import numpy as np
 import scipy.signal as scipysig
-from vrft.utils import filter_signal
+import logging as lg
+logger = lg.getLogger(__name__)
 
+from vrft.utils import filter_signal
 
 class iddata(object):
     """
@@ -97,7 +99,7 @@ class iddata(object):
         n = self.y.size
 
         if (n + n0) % 2 != 0:
-            print('iddata object has uneven data size. The last data point will be discarded')
+            lg.info('iddata object has uneven data size. The last data point will be discarded')
             n -= 1
 
         # First dataset
