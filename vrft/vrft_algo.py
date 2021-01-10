@@ -43,7 +43,6 @@ def virtual_reference(data: iddata, L: scipysig.dlti) -> np.ndarray:
     """
     return virtual_reference(data, L.num, L.den)
 
-
 def virtual_reference(data: iddata, num: np.ndarray, den: np.ndarray) -> np.ndarray:
     """Compute virtual reference signal by performing signal deconvolution
     Parameters
@@ -52,7 +51,7 @@ def virtual_reference(data: iddata, num: np.ndarray, den: np.ndarray) -> np.ndar
         iddata object containing data from experiments
     num : np.ndarray
         numerator of a discrete transfer function
-    phi2 : np.ndarray
+    den : np.ndarray
         denominator of a discrete transfer function
 
     Returns
@@ -75,50 +74,71 @@ def virtual_reference(data: iddata, num: np.ndarray, den: np.ndarray) -> np.ndar
     offset_N = len(den) - N - 1
 
     lag = N - M  # number of initial conditions
-    y0 = data.y0
 
-    if y0 is None:
-        y0 = [0.] * lag
+    y = data.y
+    y0 = data.y0
 
     if y0 is not None and (lag != len(y0)):
         raise ValueError("Wrong initial condition size.")
+    
+    if y0 is None:
+        y0 = [0.] * lag
 
-    reference = np.zeros_like(data.y)
-    L = len(data.y)
+    zi = scipysig.lfilter_zi(den, num)
+    r, _ = scipysig.lfilter(den, num, y, zi=zi*y[0])
+    r = r[lag:]
 
-    for k in range(0, len(data.y) + lag):
-        left_side = 0
-        r = 0
+    return r, len(r)
 
-        start_i = 0 if k >= M else M - k
-        start_j = 0 if k >= N else N - k
+    # y0 = data.y0
 
-        for i in range(start_i, N + 1):
-            index = k + i - N
-            if (index < 0):
-                left_side += den[offset_N +
-                                 abs(i - N)] * y0[abs(index) - 1]
-            else:
-                left_side += den[offset_N + abs(i - N)] * (
-                    data.y[index] if index < L else 0)
+    # if y0 is None:
+    #     y0 = [0.] * lag
 
-        for j in range(start_j, M + 1):
-            index = k + j - N
-            if (start_j != M):
-                left_side += -num[offset_M + abs(j - M)] * reference[index]
-            else:
-                r = num[offset_M]
+    # if y0 is not None and (lag != len(y0)):
+    #     raise ValueError("Wrong initial condition size.")
 
-        if (np.isclose(r, 0.0) != True):
-            reference[k - lag] = left_side / r
-        else:
-            reference[k - lag] = 0.0
+    
 
-    #add missing data..just copy last N-M points
-    #for i in range(lag):
-    #    reference[len(self.data.y)+i-lag] =0 #reference[len(self.data.y)+i-1-lag]
 
-    return reference[:-lag], len(reference[:-lag])
+    # # return r, len(r)
+
+    # reference = np.zeros_like(data.y)
+    # L = len(data.y)
+
+    # for k in range(0, len(data.y) + lag):
+    #     left_side = 0
+    #     r = 0
+
+    #     start_i = 0 if k >= M else M - k
+    #     start_j = 0 if k >= N else N - k
+
+    #     for i in range(start_i, N + 1):
+    #         index = k + i - N
+    #         if (index < 0):
+    #             left_side += den[offset_N +
+    #                              abs(i - N)] * y0[abs(index) - 1]
+    #         else:
+    #             left_side += den[offset_N + abs(i - N)] * (
+    #                 data.y[index] if index < L else 0)
+
+    #     for j in range(start_j, M + 1):
+    #         index = k + j - N
+    #         if (start_j != M):
+    #             left_side += -num[offset_M + abs(j - M)] * reference[index]
+    #         else:
+    #             r = num[offset_M]
+
+    #     if (np.isclose(r, 0.0) != True):
+    #         reference[k - lag] = left_side / r
+    #     else:
+    #         reference[k - lag] = 0.0
+
+    # #add missing data..just copy last N-M points
+    # #for i in range(lag):
+    # #    reference[len(self.data.y)+i-lag] =0 #reference[len(self.data.y)+i-1-lag]
+
+    # return reference[:-lag], len(reference[:-lag])
 
 
 def compute_vrft_loss(data: iddata, phi: np.ndarray, theta: np.ndarray) -> float:

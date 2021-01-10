@@ -68,7 +68,7 @@ class TestReference(TestCase):
             self.assertTrue(np.isclose(r[i], u[i]))
 
 
-        num = [0, 1-1.6+0.63]
+        num = [1-1.6+0.63]
         den = [1, -1.6, 0.63]
         sys = scipysig.TransferFunction(num, den, dt=t_step)
         t, y = scipysig.dlsim(sys, u, t)
