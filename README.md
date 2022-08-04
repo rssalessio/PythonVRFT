@@ -1,4 +1,5 @@
 # PythonVRFT Library - Virtual Reference Feedback Tuning - Version 0.0.6
+
 Virtual Reference Feedback Tuning (VRFT) Adaptive Control Library written in Python. Aim of this library is to provide an implementation of the VRFT (Virtual Reference Feedback Tuning) algorithm.
 
 You can find the package also at the following [link](https://pypi.org/project/pythonvrft/)
@@ -10,9 +11,11 @@ _Contributors_: Alexander Berndt
 
 ![alt tag](https://github.com/rssalessio/PythonVRFT/blob/master/examples/example2.png)
 ## License
-Our code is released under the GPLv3 license (refer to the [LICENSE](https://github.com/rssalessio/PythonVRFT/blob/master/LICENSE) file for details).
+
+Our code is released under the MIT license (refer to the [LICENSE](https://github.com/rssalessio/PythonVRFT/blob/master/LICENSE) file for details).
 
 ## Requirements
+
 To run the library you need atleast Python 3.5.
 
 Other dependencies:
@@ -20,10 +23,11 @@ Other dependencies:
 - SciPy (1.6.0)
 
 ## Installation
-- Install last stable version: execute the command ``` pip install pythonvrft```
+
 - Install from source: git clone this repo and from the root folder execute the command ```pip install .```
 
 ## Usage/Examples
+
 You can import the library by typing ```python import vrft``` in your code.
 
 To learn how to use the library, check the examples located in the examples/ folder. At the moment there are examples available. 
@@ -65,12 +69,14 @@ theta, _, _, C = compute_vrft(data, ref_model, control, pre_filter)
 ```
 
 ## Tests
+
 To execute tests run the following command from the root folder of the repo
 ```sh
 python -m unittest
 ``` 
 
 ## Changelog
+
 - [**V. 0.0.2**][26.03.2017] Implement the basic VRFT algorithm (1 DOF. offline, linear controller, controller expressed as scalar product theta*f(z))
 - [**V. 0.0.3**][05.01.2021] Code refactoring and conversion to Python 3; Removed support for Python Control library.
 - [**V. 0.0.5**][08.01.2021] Add Instrumental Variables (IVs) Support
@@ -80,6 +86,7 @@ python -m unittest
 - [**TODO**] Add Cython support
 
 ## Citations
+
 If you find this code useful in your research, please, consider citing it:
 >@misc{pythonvrft,
 >  author       = {Alessio Russo},
